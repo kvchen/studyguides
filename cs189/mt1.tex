@@ -1,0 +1,287 @@
+\documentclass[10pt,landscape]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{multicol}
+\usepackage{calc}
+\usepackage{ifthen}
+\usepackage[landscape]{geometry}
+\usepackage{hyperref}
+\usepackage{amsmath, amssymb, amsthm, bm, hyperref, float}
+
+% This sets page margins to .5 inch if using letter paper, and to 1cm
+% if using A4 paper. (This probably isn't strictly necessary.)
+% If using another size paper, use default 1cm margins.
+\ifthenelse{\lengthtest { \paperwidth = 11in}}
+	{ \geometry{top=.5in,left=.5in,right=.5in,bottom=.5in} }
+	{\ifthenelse{ \lengthtest{ \paperwidth = 297mm}}
+		{\geometry{top=1cm,left=1cm,right=1cm,bottom=1cm} }
+		{\geometry{top=1cm,left=1cm,right=1cm,bottom=1cm} }
+	}
+
+% Turn off header and footer
+\pagestyle{empty}
+ 
+
+% Redefine section commands to use less space
+\makeatletter
+\renewcommand{\section}{\@startsection{section}{1}{0mm}%
+                                {-1ex plus -.5ex minus -.2ex}%
+                                {0.5ex plus .2ex}%x
+                                {\normalfont\large\bfseries}}
+\renewcommand{\subsection}{\@startsection{subsection}{2}{0mm}%
+                                {-1explus -.5ex minus -.2ex}%
+                                {0.5ex plus .2ex}%
+                                {\normalfont\normalsize\bfseries}}
+\renewcommand{\subsubsection}{\@startsection{subsubsection}{3}{0mm}%
+                                {-1ex plus -.5ex minus -.2ex}%
+                                {1ex plus .2ex}%
+                                {\normalfont\small\bfseries}}
+\makeatother
+
+% Define BibTeX command
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+% Don't print section numbers
+\setcounter{secnumdepth}{0}
+
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt plus 0.5ex}
+
+
+% -----------------------------------------------------------------------
+
+\begin{document}
+
+\raggedright
+\footnotesize
+\begin{multicols}{3}
+
+
+% multicol parameters
+% These lengths are set only within the two main columns
+%\setlength{\columnseprule}{0.25pt}
+\setlength{\premulticols}{1pt}
+\setlength{\postmulticols}{1pt}
+\setlength{\multicolsep}{1pt}
+\setlength{\columnsep}{2pt}
+
+\begin{center}
+\textbf{CS189 Midterm 1 Study Guide}
+\end{center}
+
+\section{Equations}
+
+\textbf{Statistics}:
+
+\begin{tabular}{@{}ll@{}}
+Normal distribution     & 
+$\frac{1}{\sigma \sqrt{2\pi}}\exp(-\frac{(x-\mu)^2}{2\sigma^2})$ \\
+Poisson distribution    & $p(x, \lambda) = \frac{e^{-\lambda}\lambda^x}{x!}$ \\
+Bayes rule              & $P(A|B) = \frac{P(A)P(B|A)}{P(B)}$ \\
+\end{tabular}
+
+\textbf{Matrix Calculus}:
+
+\begin{tabular}{@{}ll@{}}
+$\partial(x^T a) / \partial x$      & $a$ \\
+$\partial(x^T Ax) / \partial x$     & $(A + A^T) x$ \\
+$\partial Trace(XA) / \partial X$   & $A^T$ \\
+$\partial(a^T Xb) / \partial X$     & $ab^T$
+\end{tabular}
+
+\section{Support Vector Machines}
+
+\textbf{Linear SVM}: classifier that draws decision boundary. hyperparameter C (tradeoff between training error vs. model complexity, allows points to be misclassified)
+
+\textbf{Kernel Trick}:
+
+\begin{tabular}{@{}ll@{}}
+parametric      & $f(x)=w \cdot \Phi(x)$ \\
+                & $w = \sum_k \alpha_k \Phi(x^k)$ \\
+non-parametric  & $f(x) = \sum_k \alpha_k k(x^k, x)$ \\
+                & $k(x^k, x) = \Phi(x^k) \cdot \Phi(x)$
+\end{tabular}
+
+\section{Learning Rules}
+
+SGD: Differentiate regularized loss w/ respect to $w$, find $\Delta w$ proportional to the negative gradient. Obtain dual form $\Delta \alpha$ by using kernel trick, NOT by differentiating loss. Does not exploit convexity of risk function; best approach for big data but NOT when N or d is small.
+
+
+\section{Risk Minimization}
+
+\textbf{Risk/Loss Functionals}
+
+\begin{tabular}{@{}ll@{}}
+risk                    & $(1/N)\sum_{k=1:N} L(f(x^k, w), y^k)$ \\
+true gradient           & $w \leftarrow w - \eta\nabla_w R$ \\
+stochastic gradient     & $w \leftarrow w - \eta\nabla_w L$ \\
+SRM/regularization      & $w_i \leftarrow (1 - \gamma) w_i - \eta \partial R_{train} / \partial w_j$ \\
+linear discriminant     & $f(x) = \sum_i w_i x_i = wx$ \\
+functional margin       & $z = y f(x), y=\pm 1$ \\
+\end{tabular}
+
+\textbf{Risk Types}
+
+guaranteed risk: $R_{gua}[f] = R_{train}[f] + \epsilon (\delta, C/N)$ with high probability $(1-\delta)$ \\
+regularized risk: $R_{reg}[f] = R_{train}[f] + \lambda \lVert w \rVert^2$
+
+\textbf{Regularization}: penalizes model complexity at expense of more training error, often explicitly part of loss function.
+
+\textbf{Norms}: $\lVert x \rVert_p = (|x_1|^p + |x_2|^p + \cdots)^{1/p}$
+
+L1 norm helps perform feature selection in sparse feature spaces
+
+
+                
+\textbf{Hebb's rule}:
+
+$w \leftarrow w + y_k \Phi(x^k)$ \\
+$\alpha_k \leftarrow \alpha_k + y_k$
+
+Perceptron uses same rule, but only updates on misclassification $y_k f(x^k) < 0$.
+
+\textbf{Update rules}:
+
+\begin{tabular}{@{}ll@{}}
+perceptron                  & $\Delta w_i = \eta y \Phi_i(x_i)$ if $z \le 0$ \\
+                            & $\Delta \alpha_k = \eta y^k$ \\
+large margin perceptron:    & $\Delta w_i = \eta y \Phi_i(x_i)$ if $z \le 1$ \\
+optimum margin perceptron:  & $\Delta w_i = \eta y \Phi_i(x_i)$ if $min(z)$ \\
+least mean squares:         & $\Delta w_i = \eta (y - f(x)) \Phi_i (x)$ \\
+                            & $\Delta \alpha_k = \eta (y^k - f(x^k))$
+\end{tabular}
+
+\textbf{Hessian}: $H = [\partial^2 R / \partial w_i \partial w_j]$
+
+
+\section{Logistic Regression}
+
+Like Hebb's rule but weighted; misclassifications are more heavily weighted (multiplied by $S(-z)$.
+
+\textbf{Linear logistic regression}
+
+$\log [P_f (Y=1 | X=x) / P_f (Y=-1 | X=x)] = w \cdot x + b$
+
+logistic function: $S(t) = g^{-1}(t) = 1 / (1+e^{-t})$
+
+\begin{align*}
+R(f) &= (1/N) \sum_{k=1:N} -\log P_f (Y=y^k | X=x^k) \\
+&= (1/N) \sum_{k=1:N} log(1+e^{-z})
+\end{align*}
+
+\begin{align*}
+\Delta w_i &= -\eta \partial L  / \partial w_i = -\eta \partial L / \partial z . \partial z / \partial w_i \\
+&= \eta S(-z) y \Phi_i (x)
+\end{align*}
+
+Update equations:
+
+\begin{align*}
+\Delta w_i &= (-\gamma w_i) + \eta S(-z) y \Phi_i (x) \\
+\Delta \alpha_k &= (-\gamma \alpha_k) + \eta S(-z) y^k \text{ for example k} \\
+\Delta \alpha_h &= (-\gamma \alpha_h) \text{ for other examples}
+\end{align*}
+
+
+\section{Ridge Regression}
+
+$\sum_i w_i x^k_i = y^k$ for all $k=1..m$
+
+\begin{align*}
+Xw^T &= y \\
+X^T X w^T &= X^T y \\
+w^T &= (X^T X)^{-1} X^T y
+\end{align*}
+
+\textbf{Optimal solution}: $w^T = X^+ y$
+
+\textbf{Pseudo-inverse}
+
+Case 1) $N > d$ overdetermined, no exact solution. Optimal RSS solution is
+
+$X^+ = \lim_{\lambda \rightarrow 0} (X^T X + \lambda I)^{-1} X^T$
+
+Case 2) $N < d$ underdetermined, optimize for $\min(\lVert w \rVert)$
+
+$X^+ = \lim_{\lambda \rightarrow 0} X^T(XX^T + \lambda I)^{-1}$
+
+Not limit when $\lambda \rightarrow 0$, but find optimal value through cross-validation.
+
+\textbf{Residual}: $y-\hat{y} = (I-XX^+)y$
+
+\textbf{Kernel trick}: In case 2, dimensionality of features can approach $\infty$. Instead, replace $XX^T$ by a $(N, N)$ kernel matrix $K = k(x^k, x^h)$. $\alpha = (K + \lambda I)^{-1} y$ yields the nonlinear regression function $f(x) = \sum_k \alpha_k k(x, x_k)$.
+
+\textbf{Principal Component Analysis (PCA)}: decrease dimensionality of features by constructing linear combinations of the features such that the reconstructed patterns are as close as possible to the original features (minimize RSS). We do this by removing the dimensions with the smallest eigenvalues (smallest variance, affects the data the least).
+
+\section{Kernel Machines}
+
+Kernels are dot products in a potentially infinite $\Phi$ space.
+Good kernels are symmetric: $k(x, x') = k(x', x)$.
+Kernel matrix should be invertible, possibly after regularization ($K+\lambda I$). Satisfied if matrix is PSD, all eigenvalues > 0.
+
+$f(x) = \sum_{k=1:N} y_k k(x, x_k)$
+
+Radial kernels:
+
+\textbf{Parzen window}: $k(x, x_k) = 1(\lVert x - x_k \rVert^2 < \sigma^2)$
+
+\textbf{Gaussian kernel}: $\exp -(\lVert x - x_k \rVert^2 / 2\sigma^2)$
+
+Non-radial kernels:
+
+\textbf{Linear kernel}: $k(x, x_k) = x \cdot x_k$
+
+\textbf{Polynomial kernel}: $k(x, x_k) = (1 + x \cdot x_k)^q$
+
+
+\section{Bayesian Decision Theory}
+
+Datasets should be IID.
+
+\textbf{Bonferroni Correction}: $p' = mp$, where we use $m$ classifiers.
+
+\section{Kernel Methods}
+
+
+\section{Performance Evaluation}
+
+
+\section{Model Selection}
+
+
+\section{Gaussian Classification}
+
+Assumptions: Generating model (draw $y$ first, draw $x$ given $y$), Gaussian "noise," independence of features in given class (no covariance), same variance for all classes. NOT optimum Bayes classifier because assumptions almost always violated. We can post-fit bias term by adjusting the threshold.
+
+If two classes have same variance, Gaussian classifier is a linear discriminant (equivalent to centroid method, Hebb's rule with target values $1/N_1$ and $-1/N_0$).
+
+Bayes rule: $P(X, Y) = P(X)P(Y|X) = P(Y)P(X|Y)$
+
+Gaussian classifier: $P(Y=y | X=x) ~ P(Y=y)P(X=x | Y=y)$
+
+Prior: $P(Y=y)$, relative class abundance (occurrences over total count)
+
+Likelihood: $P(X=x|Y=y)$, probability $x$ belongs to class $y$, proportional to $\exp(-\lVert x - \mu^{|y|} \rVert^2 / 2\sigma^2)$
+
+\section{LDA}
+
+\textbf{Data transforms}:
+
+Centering: subtracting mean of the features
+
+Standardizing (sphering): subtracting by mean, dividing by standard deviation (component-wise)
+
+Whitening: multiply by square root of inverse covariance matrix, $\Phi = X(X^T X)^{-1/2}$
+
+\textbf{Linear Discriminant Analysis}:
+
+Generalization of Gaussian classifier for cases where the input variables aren't statistically independent, but all classes have same covariance matrix
+
+PCA, ridge regression use covariance matrix of all data combined. LCA uses pooled, within-class covariance
+
+Useful for multi-class classification and data visualization. 
+
+
+\end{multicols}
+\end{document}
