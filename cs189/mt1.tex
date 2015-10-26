@@ -70,25 +70,36 @@
 \textbf{CS189 Midterm 1 Study Guide}
 \end{center}
 
+
+% =============================================================================
+
 \section{Equations}
 
-\textbf{Statistics}:
+\textbf{Probability}:
 
 \begin{tabular}{@{}ll@{}}
-Normal distribution     & 
-$\frac{1}{\sigma \sqrt{2\pi}}\exp(-\frac{(x-\mu)^2}{2\sigma^2})$ \\
-Poisson distribution    & $p(x, \lambda) = \frac{e^{-\lambda}\lambda^x}{x!}$ \\
-Bayes rule              & $P(A|B) = \frac{P(A)P(B|A)}{P(B)}$ \\
+Normal distribution         & $\frac{1}{\sigma \sqrt{2\pi}}\exp(-(x-\mu)^2 / (2\sigma^2))$ \\
+Multivariate normal         & $\frac{1}{\sqrt{(2\pi)^k |\Sigma|}} \exp(-\frac{1}{2}(x-\mu)^T \Sigma^{-1}(x-\mu))$ \\
+
+Poisson distribution        & $p(x, \lambda) = (e^{-\lambda}\lambda^x)/x!$ \\
+Bayes' rule                 & $P(A|B) = P(A)P(B|A) / P(B)$ \\
+Covariance                  & $\mathbb{E}[(x_i - \mu_i)(x_j - \mu_j)]x$ \\
+Expectation                 & $\mathbb{E}[cX] = c\mathbb{E}[X]$ \\
+Variance                    & $Var(cX) = c^2 Var(X)$ \\
 \end{tabular}
 
-\textbf{Matrix Calculus}:
+\textbf{Matrices}:
 
 \begin{tabular}{@{}ll@{}}
+$(AB)^T$                            & $B^T A^T$ \\
+$(A^T)^{-1}$                        & $(A^{-1})^T$ \\
 $\partial(x^T a) / \partial x$      & $a$ \\
 $\partial(x^T Ax) / \partial x$     & $(A + A^T) x$ \\
 $\partial Trace(XA) / \partial X$   & $A^T$ \\
 $\partial(a^T Xb) / \partial X$     & $ab^T$
 \end{tabular}
+
+% =============================================================================
 
 \section{Support Vector Machines}
 
@@ -103,10 +114,36 @@ non-parametric  & $f(x) = \sum_k \alpha_k k(x^k, x)$ \\
                 & $k(x^k, x) = \Phi(x^k) \cdot \Phi(x)$
 \end{tabular}
 
+% =============================================================================
+
 \section{Learning Rules}
 
-SGD: Differentiate regularized loss w/ respect to $w$, find $\Delta w$ proportional to the negative gradient. Obtain dual form $\Delta \alpha$ by using kernel trick, NOT by differentiating loss. Does not exploit convexity of risk function; best approach for big data but NOT when N or d is small.
+\textbf{Gradient Descent}
 
+\textbf{Stochastic}: Differentiate regularized loss w/ respect to $w$, find $\Delta w$ proportional to the negative gradient. Obtain dual form $\Delta \alpha$ by using kernel trick, NOT by differentiating loss. Does not exploit convexity of risk function; best approach for big data but NOT when N or d is small.
+
+\textbf{Hebb's rule}:
+
+$w = \sum_k y^k x^k$
+
+$w \leftarrow w + y_k \Phi(x^k)$
+
+$\alpha_k \leftarrow \alpha_k + y_k$
+
+Perceptron uses same rule, but only updates on misclassification $y_k f(x^k) < 0$.
+
+\textbf{Update rules}:
+
+\begin{tabular}{@{}ll@{}}
+perceptron                  & $\Delta w_i = \eta y \Phi_i(x_i)$ if $z \le 0$ \\
+                            & $\Delta \alpha_k = \eta y^k$ \\
+large margin perceptron:    & $\Delta w_i = \eta y \Phi_i(x_i)$ if $z \le 1$ \\
+optimum margin perceptron:  & $\Delta w_i = \eta y \Phi_i(x_i)$ if $min(z)$ \\
+least mean squares:         & $\Delta w_i = \eta (y - f(x)) \Phi_i (x)$ \\
+                            & $\Delta \alpha_k = \eta (y^k - f(x^k))$
+\end{tabular}
+
+% =============================================================================
 
 \section{Risk Minimization}
 
@@ -130,26 +167,10 @@ regularized risk: $R_{reg}[f] = R_{train}[f] + \lambda \lVert w \rVert^2$
 
 \textbf{Norms}: $\lVert x \rVert_p = (|x_1|^p + |x_2|^p + \cdots)^{1/p}$
 
-L1 norm helps perform feature selection in sparse feature spaces
-
-
-                
-\textbf{Hebb's rule}:
-
-$w \leftarrow w + y_k \Phi(x^k)$ \\
-$\alpha_k \leftarrow \alpha_k + y_k$
-
-Perceptron uses same rule, but only updates on misclassification $y_k f(x^k) < 0$.
-
-\textbf{Update rules}:
-
 \begin{tabular}{@{}ll@{}}
-perceptron                  & $\Delta w_i = \eta y \Phi_i(x_i)$ if $z \le 0$ \\
-                            & $\Delta \alpha_k = \eta y^k$ \\
-large margin perceptron:    & $\Delta w_i = \eta y \Phi_i(x_i)$ if $z \le 1$ \\
-optimum margin perceptron:  & $\Delta w_i = \eta y \Phi_i(x_i)$ if $min(z)$ \\
-least mean squares:         & $\Delta w_i = \eta (y - f(x)) \Phi_i (x)$ \\
-                            & $\Delta \alpha_k = \eta (y^k - f(x^k))$
+L0 norm             & penalizes number of features considered \\
+L1 norm             & makes weight vector more sparse \\
+L2 norm             & shrinks weight vector to reduce variance \\
 \end{tabular}
 
 \textbf{Hessian}: $H = [\partial^2 R / \partial w_i \partial w_j]$
@@ -165,10 +186,9 @@ $\log [P_f (Y=1 | X=x) / P_f (Y=-1 | X=x)] = w \cdot x + b$
 
 logistic function: $S(t) = g^{-1}(t) = 1 / (1+e^{-t})$
 
-\begin{align*}
-R(f) &= (1/N) \sum_{k=1:N} -\log P_f (Y=y^k | X=x^k) \\
-&= (1/N) \sum_{k=1:N} log(1+e^{-z})
-\end{align*}
+\begin{equation}
+R(f) = (1/N) \sum_{k=1:N} \ln(1+e^{-z})
+\end{equation}
 
 \begin{align*}
 \Delta w_i &= -\eta \partial L  / \partial w_i = -\eta \partial L / \partial z . \partial z / \partial w_i \\
@@ -252,7 +272,7 @@ Datasets should be IID.
 
 \section{Gaussian Classification}
 
-Assumptions: Generating model (draw $y$ first, draw $x$ given $y$), Gaussian "noise," independence of features in given class (no covariance), same variance for all classes. NOT optimum Bayes classifier because assumptions almost always violated. We can post-fit bias term by adjusting the threshold.
+Assumptions: Generating model (draw $y$ first, draw $x$ given $y$), variance in dataset explained by Gaussian noise, independence of features in given class (no covariance), same variance for all classes. NOT optimum Bayes classifier because assumptions almost always violated. We can post-fit bias term by adjusting the threshold.
 
 If two classes have same variance, Gaussian classifier is a linear discriminant (equivalent to centroid method, Hebb's rule with target values $1/N_1$ and $-1/N_0$).
 
