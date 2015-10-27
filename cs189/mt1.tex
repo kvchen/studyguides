@@ -75,19 +75,26 @@
 
 \section{Equations}
 
-\textbf{Probability}:
+\textbf{Probability}
 
 \begin{tabular}{@{}ll@{}}
-Normal distribution         & $\frac{1}{\sigma \sqrt{2\pi}}\exp(-(x-\mu)^2 / (2\sigma^2))$ \\
-Multivariate normal         & $\frac{1}{\sqrt{(2\pi)^k |\Sigma|}} \exp(-\frac{1}{2}(x-\mu)^T \Sigma^{-1}(x-\mu))$ \\
-Poisson distribution        & $p(x, \lambda) = (e^{-\lambda}\lambda^x)/x!$ \\
-Bayes' rule                 & $P(A|B) = P(A)P(B|A) / P(B)$ \\
-Expectation                 & $\mathbb{E}[cX] = c\mathbb{E}[X]$ \\
-Covariance                  & $\mathbb{E}[(x_i - \mu_i)(x_j - \mu_j)]$ \\
-Covariance matrix           & $X^T X = US^2 U^T$ for centered dataset \\
-                            & $\sigma_{ij} = \frac{1}{N}\sum_{k=1:N} (x_i^k - \mu_i)(x_j^k - \mu_{xj})$ \\
-Variance                    & $Var(X) = E[(X-E[X])^2] = \sigma^2$ \\
-                            & $Var(cX) = c^2 Var(X)$ \\
+Bayes' rule         & $P(A|B) = P(A)P(B|A) / P(B)$ \\
+Expected value      & $\mathbb{E}[cX] = c\mathbb{E}[X]$ \\
+Variance            & $Var(X) = E[(X-E[X])^2] = \sigma^2$ \\
+                    & $Var(cX) = c^2 Var(X)$ \\
+Covariance          & $\mathbb{E}[(x_i - \mu_i)(x_j - \mu_j)]$ \\
+Covariance matrix   & $X^T X = US^2 U^T$ for centered dataset \\
+                    & $\sigma_{ij} = \frac{1}{N}\sum_{k=1:N} (x_i^k - \mu_i)(x_j^k - \mu_{xj})$ \\
+Hessian             & $[\partial^2 R / \partial w_i \partial w_j]$ \\
+Hessian matrix      & $\partial^2 R / \partial w^2$
+\end{tabular}
+
+\textbf{Distributions}
+
+\begin{tabular}{@{}ll@{}}
+Isotropic normal        & $\frac{1}{\sigma \sqrt{2\pi}}\exp(-(x-\mu)^2 / (2\sigma^2))$ \\
+Multivariate normal     & $\frac{1}{\sqrt{(2\pi)^k |\Sigma|}} \exp(-\frac{1}{2}(x-\mu)^T \Sigma^{-1}(x-\mu))$ \\
+Poisson distribution    & $p(x, \lambda) = (e^{-\lambda}\lambda^x)/x!$ \\
 \end{tabular}
 
 \textbf{Matrices}:
@@ -101,46 +108,29 @@ $\partial Trace(XA) / \partial X$   & $A^T$ \\
 $\partial(a^T Xb) / \partial X$     & $ab^T$
 \end{tabular}
 
-% =============================================================================
+\textbf{Maximum Likelihood Estimation} Find likelihood function, take negative log likelihood, take derivative with respect to optimized parameter. Set derivative to 0.
 
-\section{Support Vector Machines}
-
-\textbf{Linear SVM}: classifier that draws decision boundary. hyperparameter C (tradeoff between training error vs. model complexity, allows points to be misclassified)
-
-\textbf{Kernel Trick}:
-
-\begin{tabular}{@{}ll@{}}
-parametric      & $f(x)=w \cdot \Phi(x)$ \\
-                & $w = \sum_k \alpha_k \Phi(x^k)$ \\
-non-parametric  & $f(x) = \sum_k \alpha_k k(x^k, x)$ \\
-                & $k(x^k, x) = \Phi(x^k) \cdot \Phi(x)$
-\end{tabular}
+\textbf{Maximum A Posteriori (MAP)} $argmin -\log P(D|f) (-\log P(f))$
 
 % =============================================================================
 
-\section{Learning Rules}
+\section{Training Methods}
 
-\textbf{Gradient Descent}
+\textbf{Hebb's rule} $w = \sum_k y^k x^k$, $w \leftarrow w + y^k \Phi(x^k)$, $\alpha^k \leftarrow \alpha^k + y^k$
 
-\textbf{Stochastic}: Differentiate regularized loss w/ respect to $w$, find $\Delta w$ proportional to the negative gradient. Obtain dual form $\Delta \alpha$ by using kernel trick, NOT by differentiating loss. Does not exploit convexity of risk function; best approach for big data but NOT when N or d is small.
+\textbf{Weight decay} $w_i \leftarrow (1 - \gamma) w_i + y^k x_i^k$
 
-\textbf{Hebb's rule}:
+\textbf{Perceptron algorithm} Always finds separating hyperplane if samples linearly separable. Equations: $\Delta w_i = \eta y \Phi_i(x_i)$, $\Delta \alpha_k = \eta y^k$. Normal perceptron: $z < 0$, update if misclassified. Large-margin: $z < 1$, update if misclassified or within margin. Optimum margin: $min(z)$, only update if closest point to margin.
 
-$w = \sum_k y^k x^k$
+\textbf{Linear SVM} Fits a hyperplane to separate and classify data. Soft-margin hyperparameter $C$ represents tradeoff between robustness and fit. Minimizes $1/\text{margin} + C(\text{training error})$. Approaches hard margin as $C\rightarrow\infty$, and vice versa
 
-$w \leftarrow w + y_k \Phi(x^k)$
+\textbf{Newton's Method} $w \leftarrow w - H^{-1}\nabla_w R$
 
-$\alpha_k \leftarrow \alpha_k + y_k$
-
-Perceptron uses same rule, but only updates on misclassification $y_k f(x^k) < 0$.
+\textbf{Stochastic Gradient Descent} $\Delta w_i = -\eta \partial L / \partial w_i$. Obtain dual form $\Delta \alpha$ by using kernel trick, NOT by differentiating loss. Does not exploit convexity of risk function; best approach for big data but NOT when N or d is small.
 
 \textbf{Update rules}:
 
 \begin{tabular}{@{}ll@{}}
-perceptron                  & $\Delta w_i = \eta y \Phi_i(x_i)$ if $z \le 0$ \\
-                            & $\Delta \alpha_k = \eta y^k$ \\
-large margin perceptron:    & $\Delta w_i = \eta y \Phi_i(x_i)$ if $z \le 1$ \\
-optimum margin perceptron:  & $\Delta w_i = \eta y \Phi_i(x_i)$ if $min(z)$ \\
 least mean squares:         & $\Delta w_i = \eta (y - f(x)) \Phi_i (x)$ \\
                             & $\Delta \alpha_k = \eta (y^k - f(x^k))$
 \end{tabular}
@@ -149,57 +139,60 @@ least mean squares:         & $\Delta w_i = \eta (y - f(x)) \Phi_i (x)$ \\
 
 \section{Risk Minimization}
 
+\textbf{Loss functions}
+
+\begin{tabular}{@{}ll@{}}
+Square          & $(1-z)^2$ \\
+Perceptron      & $max(0, -z)$ \\
+Hinge           & $max(0, 1-z)$ \\
+Logistic        & $\ln(1+e^{-z})$ \\
+Adaboost        & $e^{-z}$
+\end{tabular}
+
+
 \textbf{Risk/Loss Functionals}
 
 \begin{tabular}{@{}ll@{}}
+functional margin       & $z = y f(x), y=\pm 1$ \\
 risk                    & $(1/N)\sum_{k=1:N} L(f(x^k, w), y^k)$ \\
-true gradient           & $w \leftarrow w - \eta\nabla_w R$ \\
+batch gradient          & $w \leftarrow w - \eta\nabla_w R$ \\
 stochastic gradient     & $w \leftarrow w - \eta\nabla_w L$ \\
 SRM/regularization      & $w_i \leftarrow (1 - \gamma) w_i - \eta \partial R_{train} / \partial w_j$ \\
 linear discriminant     & $f(x) = \sum_i w_i x_i = wx$ \\
-functional margin       & $z = y f(x), y=\pm 1$ \\
 \end{tabular}
+
+\textbf{Regularization} penalizes model complexity at expense of more training error, often explicitly part of loss function. Takes the form of shrinkage (weight decay, ridge regression, SVM), feature selection, kernel parameters, etc.
 
 \textbf{Risk Types}
 
 guaranteed risk: $R_{gua}[f] = R_{train}[f] + \epsilon (\delta, C/N)$ with high probability $(1-\delta)$ \\
 regularized risk: $R_{reg}[f] = R_{train}[f] + \lambda \lVert w \rVert^2$
 
-\textbf{Regularization}: penalizes model complexity at expense of more training error, often explicitly part of loss function.
-
-\textbf{Norms}: $\lVert x \rVert_p = (|x_1|^p + |x_2|^p + \cdots)^{1/p}$
+\textbf{Norms} $\lVert x \rVert_p = (|x_1|^p + |x_2|^p + \cdots)^{1/p}$
 
 \begin{tabular}{@{}ll@{}}
-L0 norm             & penalizes number of features considered \\
-L1 norm             & makes weight vector more sparse \\
-L2 norm             & shrinks weight vector to reduce variance \\
+$L_0$ norm          & penalizes number of features considered \\
+$L_1$ norm (lasso)  & makes weight vector more sparse \\
+$L_2$ norm (ridge)  & shrinks weight vector to reduce variance \\
 \end{tabular}
-
-\textbf{Hessian}: $H = [\partial^2 R / \partial w_i \partial w_j]$
 
 % =============================================================================
 
 \section{Logistic Regression}
 
-Like Hebb's rule but weighted; misclassifications are more heavily weighted (multiplied by $S(-z)$.
+Like Hebb's rule but weighted; misclassifications are more heavily weighted (multiplied by $S(-z)$).
 
-\textbf{Linear logistic regression}
+\textbf{Linear logistic regression} log odds ratio (logit) is a linear function of x, $\ln [P_f (Y=1 | X=x) / P_f (Y=-1 | X=x)] = w \cdot x + b$
 
-$\log [P_f (Y=1 | X=x) / P_f (Y=-1 | X=x)] = w \cdot x + b$
-
-logistic function: $S(t) = g^{-1}(t) = 1 / (1+e^{-t})$
-
-\begin{equation*}
-R(f) = (1/N) \sum_{k=1:N} \ln(1+e^{-z})
-\end{equation*}
+\textbf{Logistic function} $S(t) = g^{-1}(t) = 1 / (1+e^{-t})$
 
 \begin{align*}
 \Delta w_i &= -\eta \partial L  / \partial w_i 
-= -\eta \partial L / \partial z . \partial z / \partial w_i \\
-&= \eta S(-z) y \Phi_i (x)
+= -\eta \partial L / \partial z \cdot \partial z / \partial w_i \\
+&= \eta S(-z) y x_i
 \end{align*}
 
-Update equations:
+Update equations with shrinkage:
 
 \begin{align*}
 \Delta w_i &= (-\gamma w_i) + \eta S(-z) y \Phi_i (x) \\
@@ -221,6 +214,8 @@ w^T &= (X^T X)^{-1} X^T y
 
 \textbf{Optimal solution}: $w^T = X^+ y$
 
+\textbf{Residual} $y-\hat{y} = (I-XX^+)y$
+
 \textbf{Pseudo-inverse}
 
 Case 1) $N > d$ overdetermined, no exact solution. Optimal RSS solution is
@@ -233,33 +228,43 @@ $X^+ = \lim_{\lambda \rightarrow 0} X^T(XX^T + \lambda I)^{-1}$
 
 Not limit when $\lambda \rightarrow 0$, but find optimal value through cross-validation.
 
-\textbf{Residual}: $y-\hat{y} = (I-XX^+)y$
+\textbf{Kernel trick} In case 2 where $N << d$, dimensionality of features can approach $\infty$. Instead, replace $XX^T$ by a $(N, N)$ kernel matrix $K = k(x^k, x^h)$. $\alpha = (K + \lambda I)^{-1} y$ yields the nonlinear regression function $f(x) = \sum_k \alpha_k k(x, x_k)$.
 
-\textbf{Kernel trick}: In case 2, dimensionality of features can approach $\infty$. Instead, replace $XX^T$ by a $(N, N)$ kernel matrix $K = k(x^k, x^h)$. $\alpha = (K + \lambda I)^{-1} y$ yields the nonlinear regression function $f(x) = \sum_k \alpha_k k(x, x_k)$.
+\textbf{Principal Component Analysis (PCA)} decrease dimensionality of features by constructing linear combinations of the features such that the reconstructed patterns are as close as possible to the original features (minimize RSS). Accomplishes this by removing the dimensions with the smallest eigenvalues (smallest variance, affects the data the least).
 
-\textbf{Principal Component Analysis (PCA)}: decrease dimensionality of features by constructing linear combinations of the features such that the reconstructed patterns are as close as possible to the original features (minimize RSS). We do this by removing the dimensions with the smallest eigenvalues (smallest variance, affects the data the least).
+PCA Solution: $X' = XU$, $X'' = X' U^T = XUU^T$, $min_U \lVert X - XUU^T \rVert^2$
 
 % =============================================================================
 
 \section{Kernel Machines}
 
-Kernels are dot products in a potentially infinite $\Phi$ space.
-Good kernels are symmetric: $k(x, x') = k(x', x)$.
-Kernel matrix should be invertible, possibly after regularization ($K+\lambda I$). Satisfied if matrix is PSD, all eigenvalues $>$ 0.
+\textbf{Kernels} similarity measure between two datapoints, dot product in some (potentially infinite) feature space: $k(s, t) = \Phi(s) \cdot \Phi(t)$ (don't need to know $\Phi$ representation), good kernels are symmetric: $k(x, x') = k(x', x)$, kernel matrix should be invertible, possibly after regularization ($K+\lambda I$). Satisfied if matrix is PSD, all eigenvalues $\lambda_i > 0$.
 
-$f(x) = \sum_{k=1:N} y_k k(x, x_k)$
+\textbf{Kernel Trick}
 
-Radial-Basis Function (RBF) kernels:
+\begin{tabular}{@{}ll@{}}
+parametric      & $f(x)=w \cdot \Phi(x)$ \\
+                & $w = \sum_k \alpha_k \Phi(x^k)$ \\
+non-parametric  & $f(x) = \sum_k \alpha_k k(x^k, x)$ \\
+                & $k(x^k, x) = \Phi(x^k) \cdot \Phi(x)$
+\end{tabular}
 
-\textbf{Top-hat kernel}: $k(x, x_k) = 1(\lVert x - x_k \rVert^2 < \sigma^2)$
+\textbf{Parzen window} $f(x) = \sum_{k=1:N} y_k k(x, x_k)$
 
-\textbf{Gaussian kernel}: $\exp -(\lVert x - x_k \rVert^2 / 2\sigma^2)$
+\textbf{Radial kernels}
 
-Non-radial kernels:
+\begin{tabular}{@{}ll@{}}
+Top-hat     & $k(x, x_k) = 1(\lVert x - x_k \rVert^2 < \sigma^2)$ \\
+Gaussian    & $\exp -(\lVert x - x_k \rVert^2 / 2\sigma^2)$
+\end{tabular}
 
-\textbf{Linear kernel}: $k(x, x_k) = x \cdot x_k$
 
-\textbf{Polynomial kernel}: $k(x, x_k) = (1 + x \cdot x_k)^q$
+\textbf{Non-radial kernels}
+
+\begin{tabular}{@{}ll@{}}
+Linear      & $k(x, x_k) = x \cdot x_k$ \\
+Polynomial  & $k(x, x_k) = (1 + x \cdot x_k)^q$
+\end{tabular}
 
 % =============================================================================
 
@@ -297,21 +302,15 @@ If two classes have same variance, Gaussian classifier is a linear discriminant 
 
 \section{LDA}
 
-\textbf{Data transforms}:
+\textbf{Centering}: subtracting mean of the features
 
-Centering: subtracting mean of the features
+\textbf{Standardizing} sphering; subtracting by mean, dividing by standard deviation (component-wise), $\Phi(x^k) = (x^k - \mu) / \sigma$
 
-\textbf{Standardizing}: sphering; subtracting by mean, dividing by standard deviation (component-wise), $\Phi(x^k) = (x^k - \mu) / \sigma$
+\textbf{Principal axes} Diagonalize $\Sigma = X^T X = US^2 U^T$, where $U$ is an orthogonal matrix of column eigenvectors such that $U^T U = I$ and $S^2$ is a diagonal matrix of positive eigenvalues $s_i^2$. Matrix $R = USU^T = \Sigma^{1/2}$. To obtain a diagonal covariance matrix $S$, $\Phi = XU$
 
-\textbf{Whitening}: multiply by square root of inverse covariance matrix, $\Phi = X(X^T X)^{-1/2}$
+\textbf{Whitening} multiply by square root of inverse covariance matrix, $\Phi = X(X^T X)^{-1/2} = XR^{-1} = X\Sigma^{-1/2}$
 
-\textbf{Linear Discriminant Analysis}:
-
-Generalization of Gaussian classifier for cases where the input variables aren't statistically independent, but all classes have same covariance matrix
-
-PCA, ridge regression use covariance matrix of all data combined. LCA uses pooled, within-class covariance
-
-Useful for multi-class classification and data visualization. 
+\textbf{Linear Discriminant Analysis} Generalization of Gaussian classifier for cases where the input variables aren't statistically independent, but all classes have same covariance matrix $\Sigma$. Once the input space is rotated into the principal axes of the covariance matrix and rescaled by the eigenvalues, LDA is like the isotropic Gaussian classifier (centroid method). Useful for multi-class classification and data visualization.
 
 Rotate input space, then find the direction that maximizes the ratio of the between class variance over the within class variance.
 
@@ -319,6 +318,7 @@ Rotate input space, then find the direction that maximizes the ratio of the betw
 max\left(\frac{(\mu_1 - \mu_2)^2}{\sigma_1^2 + \sigma_2^2}\right)
 \end{equation*}
 
+PCA, ridge regression use covariance matrix of all data combined. LCA uses pooled, within-class covariance. In both cases, whitening is applied with $\Phi = X \Sigma ^{-1/2}$. 
 
 \end{multicols}
 \end{document}
