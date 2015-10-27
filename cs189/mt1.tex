@@ -270,43 +270,55 @@ Polynomial  & $k(x, x_k) = (1 + x \cdot x_k)^q$
 
 \section{Bayesian Decision Theory}
 
-Datasets should be IID.
+\textbf{Assumptions} Datasets should be IID for naive Bayes.
 
 \textbf{Bonferroni Correction}: $p' = mp$, where we use $m$ classifiers.
-
-\section{Kernel Methods}
 
 % =============================================================================
 
 \section{Performance Evaluation}
 
+\textbf{Metrics} error rate, bit-error rate (BER), cross-entropy, area under the ROC curve (AUC), $R^2$
+
+\textbf{Error bar} $\Sigma$ of the error rate is $\sqrt{E(1-E)/n}$
+
+\textbf{Sample size} Number of test examples needed is inversely proportional to error rate. Rule of thumb: $n = 100/E$
+
 % =============================================================================
 
 \section{Model Selection}
+
+\textbf{Filters} reduce number of hyperparameters by measuring feature relevance. Does not make use of the learning machine, uses statistics instead. Techniques used are prior knowledge, unsupervised learning to reduce dimensionality of input space, transfer learning, meta-learning, surrogate learning machines
+
+\textbf{Wrappers} use the learning machine to evaluate the performance of alternative feature subsets. Use a search method to explore the space of possible subsets. Considered a black box, no knowledge of the learning algorithm is needed to apply this method.
+
+\textbf{Embedded methods} reduce the number of hyperparameters as much as possible before passing into wrapper method (too many hyperparameters leads to overfitting). Pushes hyperparameters to a lower level and have them estimated in the process of learning parameters. This cannot be done by optimizing the training error; need two levels of inference in order to enjoy finite capacity of the learning problem. Optimizing the kernel parameters (kernel with in the Gaussian kernel or degree in the polynomial kernel) leads to infinite VC dimension (can learn perfectly any training set); optimizing the ridge or regularization parameter $\Lambda$ leads to zero capacity ($w=0$ is the optimum).
+
+\textbf{Search strategies} grid search, simulated annealing, pattern search
+
+\textbf{Voting methods} multiple models cast a vote for a class, classifier weighs each vote and makes a decision.
 
 % =============================================================================
 
 \section{Gaussian Classification}
 
-Assumptions: Generating model (draw $y$ first, draw $x$ given $y$), variance in dataset explained by Gaussian noise, independence of features in given class (no covariance), same variance for all classes. NOT optimum Bayes classifier because assumptions almost always violated. We can post-fit bias term by adjusting the threshold.
+Assumptions: Generating model (draw $y$ first, draw $x$ given $y$), variance in dataset explained by Gaussian noise, independence of features in given class (no covariance), same variance for all classes. NOT optimum Bayes classifier because assumptions almost always violated. We can post-fit bias term by adjusting the threshold. If two classes have same variance, Gaussian classifier is a linear discriminant (equivalent to centroid method, Hebb's rule with target values $y^k = 1/N_1$ if in class 1 and $-1/N_0$ otherwise). Posterior of Gaussian model is logistic with Poisson or Gaussian class conditionals.
 
-If two classes have same variance, Gaussian classifier is a linear discriminant (equivalent to centroid method, Hebb's rule with target values $1/N_1$ and $-1/N_0$).
+\textbf{Bayes' rule} $P(Y=y | X=x) ~ P(Y=y)P(X=x | Y=y)$
 
-\textbf{Bayes' rule}: $P(Y=y | X=x) ~ P(Y=y)P(X=x | Y=y)$
+\textbf{Prior} $P(Y=y)$, relative class abundance (occurrences over total count)
 
-\textbf{Prior}: $P(Y=y)$, relative class abundance (occurrences over total count)
-
-\textbf{Likelihood}: $P(X=x|Y=y)$, probability $x$ belongs to class $y$, proportional to $\exp(-\lVert x - \mu^{|y|} \rVert^2 / 2\sigma^2)$
+\textbf{Likelihood} $P(X=x|Y=y)$, probability $x$ belongs to class $y$, proportional to $\exp(-\lVert x - \mu^{|y|} \rVert^2 / 2\sigma^2)$, Gaussian noise model
 
 % =============================================================================
 
-\section{LDA}
+\section{Linear Discriminant Analysis}
 
 \textbf{Centering}: subtracting mean of the features
 
 \textbf{Standardizing} sphering; subtracting by mean, dividing by standard deviation (component-wise), $\Phi(x^k) = (x^k - \mu) / \sigma$
 
-\textbf{Principal axes} Diagonalize $\Sigma = X^T X = US^2 U^T$, where $U$ is an orthogonal matrix of column eigenvectors such that $U^T U = I$ and $S^2$ is a diagonal matrix of positive eigenvalues $s_i^2$. Matrix $R = USU^T = \Sigma^{1/2}$. To obtain a diagonal covariance matrix $S$, $\Phi = XU$
+\textbf{Principal axes} Diagonalize $\Sigma = X^T X = US^2 U^T$, where $U$ is an orthogonal matrix of column eigenvectors such that $U^T U = I$ and $S^2$ is a diagonal matrix of positive eigenvalues $s_i^2$. Matrix $R = USU^T = \Sigma^{1/2}$. To obtain a diagonal covariance matrix $S$, $\Phi = XU$. To axis-align the Gaussian, apply $U^{-1}(X-\mu)$
 
 \textbf{Whitening} multiply by square root of inverse covariance matrix, $\Phi = X(X^T X)^{-1/2} = XR^{-1} = X\Sigma^{-1/2}$
 
