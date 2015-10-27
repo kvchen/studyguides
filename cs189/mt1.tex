@@ -80,12 +80,14 @@
 \begin{tabular}{@{}ll@{}}
 Normal distribution         & $\frac{1}{\sigma \sqrt{2\pi}}\exp(-(x-\mu)^2 / (2\sigma^2))$ \\
 Multivariate normal         & $\frac{1}{\sqrt{(2\pi)^k |\Sigma|}} \exp(-\frac{1}{2}(x-\mu)^T \Sigma^{-1}(x-\mu))$ \\
-
 Poisson distribution        & $p(x, \lambda) = (e^{-\lambda}\lambda^x)/x!$ \\
 Bayes' rule                 & $P(A|B) = P(A)P(B|A) / P(B)$ \\
-Covariance                  & $\mathbb{E}[(x_i - \mu_i)(x_j - \mu_j)]x$ \\
 Expectation                 & $\mathbb{E}[cX] = c\mathbb{E}[X]$ \\
-Variance                    & $Var(cX) = c^2 Var(X)$ \\
+Covariance                  & $\mathbb{E}[(x_i - \mu_i)(x_j - \mu_j)]$ \\
+Covariance matrix           & $X^T X = US^2 U^T$ for centered dataset \\
+                            & $\sigma_{ij} = \frac{1}{N}\sum_{k=1:N} (x_i^k - \mu_i)(x_j^k - \mu_{xj})$ \\
+Variance                    & $Var(X) = \sigma^2$ \\
+                            & $Var(cX) = c^2 Var(X)$ \\
 \end{tabular}
 
 \textbf{Matrices}:
@@ -175,6 +177,7 @@ L2 norm             & shrinks weight vector to reduce variance \\
 
 \textbf{Hessian}: $H = [\partial^2 R / \partial w_i \partial w_j]$
 
+% =============================================================================
 
 \section{Logistic Regression}
 
@@ -186,12 +189,13 @@ $\log [P_f (Y=1 | X=x) / P_f (Y=-1 | X=x)] = w \cdot x + b$
 
 logistic function: $S(t) = g^{-1}(t) = 1 / (1+e^{-t})$
 
-\begin{equation}
+\begin{equation*}
 R(f) = (1/N) \sum_{k=1:N} \ln(1+e^{-z})
-\end{equation}
+\end{equation*}
 
 \begin{align*}
-\Delta w_i &= -\eta \partial L  / \partial w_i = -\eta \partial L / \partial z . \partial z / \partial w_i \\
+\Delta w_i &= -\eta \partial L  / \partial w_i 
+= -\eta \partial L / \partial z . \partial z / \partial w_i \\
 &= \eta S(-z) y \Phi_i (x)
 \end{align*}
 
@@ -203,6 +207,7 @@ Update equations:
 \Delta \alpha_h &= (-\gamma \alpha_h) \text{ for other examples}
 \end{align*}
 
+% =============================================================================
 
 \section{Ridge Regression}
 
@@ -234,11 +239,13 @@ Not limit when $\lambda \rightarrow 0$, but find optimal value through cross-val
 
 \textbf{Principal Component Analysis (PCA)}: decrease dimensionality of features by constructing linear combinations of the features such that the reconstructed patterns are as close as possible to the original features (minimize RSS). We do this by removing the dimensions with the smallest eigenvalues (smallest variance, affects the data the least).
 
+% =============================================================================
+
 \section{Kernel Machines}
 
 Kernels are dot products in a potentially infinite $\Phi$ space.
 Good kernels are symmetric: $k(x, x') = k(x', x)$.
-Kernel matrix should be invertible, possibly after regularization ($K+\lambda I$). Satisfied if matrix is PSD, all eigenvalues > 0.
+Kernel matrix should be invertible, possibly after regularization ($K+\lambda I$). Satisfied if matrix is PSD, all eigenvalues $>$ 0.
 
 $f(x) = \sum_{k=1:N} y_k k(x, x_k)$
 
@@ -246,7 +253,7 @@ Radial kernels:
 
 \textbf{Parzen window}: $k(x, x_k) = 1(\lVert x - x_k \rVert^2 < \sigma^2)$
 
-\textbf{Gaussian kernel}: $\exp -(\lVert x - x_k \rVert^2 / 2\sigma^2)$
+\textbf{Gaussian (RBF) kernel}: $\exp -(\lVert x - x_k \rVert^2 / 2\sigma^2)$
 
 Non-radial kernels:
 
@@ -254,6 +261,7 @@ Non-radial kernels:
 
 \textbf{Polynomial kernel}: $k(x, x_k) = (1 + x \cdot x_k)^q$
 
+% =============================================================================
 
 \section{Bayesian Decision Theory}
 
@@ -263,12 +271,15 @@ Datasets should be IID.
 
 \section{Kernel Methods}
 
+% =============================================================================
 
 \section{Performance Evaluation}
 
+% =============================================================================
 
 \section{Model Selection}
 
+% =============================================================================
 
 \section{Gaussian Classification}
 
@@ -276,13 +287,13 @@ Assumptions: Generating model (draw $y$ first, draw $x$ given $y$), variance in 
 
 If two classes have same variance, Gaussian classifier is a linear discriminant (equivalent to centroid method, Hebb's rule with target values $1/N_1$ and $-1/N_0$).
 
-Bayes rule: $P(X, Y) = P(X)P(Y|X) = P(Y)P(X|Y)$
+\textbf{Bayes' rule}: $P(Y=y | X=x) ~ P(Y=y)P(X=x | Y=y)$
 
-Gaussian classifier: $P(Y=y | X=x) ~ P(Y=y)P(X=x | Y=y)$
+\textbf{Prior}: $P(Y=y)$, relative class abundance (occurrences over total count)
 
-Prior: $P(Y=y)$, relative class abundance (occurrences over total count)
+\textbf{Likelihood}: $P(X=x|Y=y)$, probability $x$ belongs to class $y$, proportional to $\exp(-\lVert x - \mu^{|y|} \rVert^2 / 2\sigma^2)$
 
-Likelihood: $P(X=x|Y=y)$, probability $x$ belongs to class $y$, proportional to $\exp(-\lVert x - \mu^{|y|} \rVert^2 / 2\sigma^2)$
+% =============================================================================
 
 \section{LDA}
 
@@ -290,9 +301,9 @@ Likelihood: $P(X=x|Y=y)$, probability $x$ belongs to class $y$, proportional to 
 
 Centering: subtracting mean of the features
 
-Standardizing (sphering): subtracting by mean, dividing by standard deviation (component-wise)
+\textbf{Standardizing}: sphering; subtracting by mean, dividing by standard deviation (component-wise), $\Phi(x^k) = (x^k - \mu) / \sigma$
 
-Whitening: multiply by square root of inverse covariance matrix, $\Phi = X(X^T X)^{-1/2}$
+\textbf{Whitening}: multiply by square root of inverse covariance matrix, $\Phi = X(X^T X)^{-1/2}$
 
 \textbf{Linear Discriminant Analysis}:
 
