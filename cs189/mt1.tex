@@ -108,9 +108,9 @@ $\partial Trace(XA) / \partial X$   & $A^T$ \\
 $\partial(a^T Xb) / \partial X$     & $ab^T$
 \end{tabular}
 
-\textbf{Maximum Likelihood Estimation} Find likelihood function, take negative log likelihood, take derivative with respect to optimized parameter. Set derivative to 0.
+\textbf{Maximum Likelihood Estimation} Find likelihood function, take negative log likelihood, take derivative with respect to optimized parameter. Set derivative to 0. $argmax[P(data|model)]$
 
-\textbf{Maximum A Posteriori (MAP)} $argmin -\log P(D|f) (-\log P(f))$
+\textbf{Maximum A Posteriori (MAP)} $argmin [-\log P(D|f) (-\log P(f))]$. $-\log P(f)$ serves the role of regularizer. $argmax[P(data|model)P(model)]$
 
 % =============================================================================
 
@@ -180,7 +180,7 @@ $L_2$ norm (ridge)  & shrinks weight vector to reduce variance \\
 
 \section{Logistic Regression}
 
-Like Hebb's rule but weighted; misclassifications are more heavily weighted (multiplied by $S(-z)$).
+Like Hebb's rule but weighted; misclassifications are more heavily weighted (multiplied by $S(-z)$). A link function links the functional margin $z$ and the likelihood $P(D|f)$.
 
 \textbf{Linear logistic regression} log odds ratio (logit) is a linear function of x, $\ln [P_f (Y=1 | X=x) / P_f (Y=-1 | X=x)] = w \cdot x + b$
 
