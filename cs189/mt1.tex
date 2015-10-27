@@ -86,7 +86,7 @@ Expectation                 & $\mathbb{E}[cX] = c\mathbb{E}[X]$ \\
 Covariance                  & $\mathbb{E}[(x_i - \mu_i)(x_j - \mu_j)]$ \\
 Covariance matrix           & $X^T X = US^2 U^T$ for centered dataset \\
                             & $\sigma_{ij} = \frac{1}{N}\sum_{k=1:N} (x_i^k - \mu_i)(x_j^k - \mu_{xj})$ \\
-Variance                    & $Var(X) = \sigma^2$ \\
+Variance                    & $Var(X) = E[(X-E[X])^2] = \sigma^2$ \\
                             & $Var(cX) = c^2 Var(X)$ \\
 \end{tabular}
 
@@ -249,7 +249,7 @@ Kernel matrix should be invertible, possibly after regularization ($K+\lambda I$
 
 $f(x) = \sum_{k=1:N} y_k k(x, x_k)$
 
-Radial kernels:
+Radial-Basis Function (RBF) kernels:
 
 \textbf{Top-hat kernel}: $k(x, x_k) = 1(\lVert x - x_k \rVert^2 < \sigma^2)$
 
@@ -312,6 +312,12 @@ Generalization of Gaussian classifier for cases where the input variables aren't
 PCA, ridge regression use covariance matrix of all data combined. LCA uses pooled, within-class covariance
 
 Useful for multi-class classification and data visualization. 
+
+Rotate input space, then find the direction that maximizes the ratio of the between class variance over the within class variance.
+
+\begin{equation*}
+max\left(\frac{(\mu_1 - \mu_2)^2}{\sigma_1^2 + \sigma_2^2}\right)
+\end{equation*}
 
 
 \end{multicols}
