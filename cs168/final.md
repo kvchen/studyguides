@@ -138,6 +138,11 @@ Caching (pull): Replicate content on-demand after a request
 
 Replication (push): planned replication of content in multiple locations
 
+For responses:
+
+* seqnum_res >= acknum_req
+* (seqnum_res + payload_res) <= (ack_req + windowsize_req)
+
 #### Multiple Retrieval
 
 * Sequential: One object per sequence
