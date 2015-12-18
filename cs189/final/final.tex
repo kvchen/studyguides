@@ -1,0 +1,382 @@
+\documentclass[10pt,landscape]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{multicol}
+\usepackage{calc}
+\usepackage{ifthen}
+\usepackage[landscape]{geometry}
+\usepackage{hyperref}
+\usepackage{amsmath, amssymb, amsthm, bm, hyperref, float}
+
+% This sets page margins to .5 inch if using letter paper, and to 1cm
+% if using A4 paper. (This probably isn't strictly necessary.)
+% If using another size paper, use default 1cm margins.
+\ifthenelse{\lengthtest { \paperwidth = 11in}}
+    { \geometry{top=.5in,left=.5in,right=.5in,bottom=.5in} }
+    {\ifthenelse{ \lengthtest{ \paperwidth = 297mm}}
+        {\geometry{top=1cm,left=1cm,right=1cm,bottom=1cm} }
+        {\geometry{top=1cm,left=1cm,right=1cm,bottom=1cm} }
+    }
+
+% Turn off header and footer
+\pagestyle{empty}
+ 
+
+% Redefine section commands to use less space
+\makeatletter
+\renewcommand{\section}{\@startsection{section}{1}{0mm}%
+                                {-1ex plus -.5ex minus -.2ex}%
+                                {0.5ex plus .2ex}%x
+                                {\normalfont\large\bfseries}}
+\renewcommand{\subsection}{\@startsection{subsection}{2}{0mm}%
+                                {-1explus -.5ex minus -.2ex}%
+                                {0.5ex plus .2ex}%
+                                {\normalfont\normalsize\bfseries}}
+\renewcommand{\subsubsection}{\@startsection{subsubsection}{3}{0mm}%
+                                {-1ex plus -.5ex minus -.2ex}%
+                                {1ex plus .2ex}%
+                                {\normalfont\small\bfseries}}
+\makeatother
+
+% Define BibTeX command
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+% Don't print section numbers
+\setcounter{secnumdepth}{0}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt plus 0.5ex}
+
+% =============================================================================
+
+% Study guide commands
+
+\newcommand{\Lagr}{\mathcal{L}}
+
+% =============================================================================
+
+\begin{document}
+
+\raggedright
+\footnotesize
+\begin{multicols}{3}
+
+
+% multicol parameters
+% These lengths are set only within the two main columns
+%\setlength{\columnseprule}{0.25pt}
+\setlength{\premulticols}{1pt}
+\setlength{\postmulticols}{1pt}
+\setlength{\multicolsep}{1pt}
+\setlength{\columnsep}{2pt}
+
+\begin{center}
+\textbf{CS189 Midterm 1 Study Guide}
+\end{center}
+
+
+% =============================================================================
+
+\section{Equations}
+
+\textbf{Probability}
+
+\begin{tabular}{@{}ll@{}}
+Bayes' rule         & $P(A|B) = P(A)P(B|A) / P(B)$ \\
+Expected value      & $\mathbb{E}[cX] = c\mathbb{E}[X]$ \\
+Variance            & $Var(X) = E[(X-E[X])^2] = \sigma^2$ \\
+                    & $Var(cX) = c^2 Var(X)$ \\
+Covariance          & $\mathbb{E}[(x_i - \mu_i)(x_j - \mu_j)]$ \\
+Covariance matrix   & $X^T X = US^2 U^T$ for centered dataset \\
+                    & $\sigma_{ij} = \frac{1}{N}\sum_{k=1:N} (x_i^k - \mu_i)(x_j^k - \mu_{xj})$ \\
+Hessian             & $[\partial^2 R / \partial w_i \partial w_j]$ \\
+Hessian matrix      & $\partial^2 R / \partial w^2$
+\end{tabular}
+
+\textbf{Distributions}
+
+\begin{tabular}{@{}ll@{}}
+Isotropic normal        & $\frac{1}{\sigma \sqrt{2\pi}}\exp(-(x-\mu)^2 / (2\sigma^2))$ \\
+Multivariate normal     & $\frac{1}{\sqrt{(2\pi)^k |\Sigma|}} \exp(-\frac{1}{2}(x-\mu)^T \Sigma^{-1}(x-\mu))$ \\
+Poisson distribution    & $p(x, \lambda) = (e^{-\lambda}\lambda^x)/x!$ \\
+\end{tabular}
+
+\textbf{Matrices}:
+
+\begin{tabular}{@{}ll@{}}
+$(AB)^T$                            & $B^T A^T$ \\
+$(A^T)^{-1}$                        & $(A^{-1})^T$ \\
+$\partial(x^T a) / \partial x$      & $a$ \\
+$\partial(x^T Ax) / \partial x$     & $(A + A^T) x$ \\
+$\partial Trace(XA) / \partial X$   & $A^T$ \\
+$\partial(a^T Xb) / \partial X$     & $ab^T$
+\end{tabular}
+
+\textbf{Maximum Likelihood Estimation} Find likelihood function, take negative log likelihood, take derivative with respect to optimized parameter. Set derivative to 0. $argmax[P(data|model)]$
+
+\textbf{Maximum A Posteriori (MAP)} $argmin [-\log P(D|f) (-\log P(f))]$. $-\log P(f)$ serves the role of regularizer. $argmax[P(data|model)P(model)]$
+
+% =============================================================================
+
+\section{Training Methods}
+
+\textbf{Hebb's rule} $w = \sum_k y^k x^k$, $w \leftarrow w + y^k \Phi(x^k)$, $\alpha^k \leftarrow \alpha^k + y^k$
+
+\textbf{Weight decay} $w_i \leftarrow (1 - \gamma) w_i + y^k x_i^k$
+
+\textbf{Perceptron algorithm} Always finds separating hyperplane if samples linearly separable. Equations: $\Delta w_i = \eta y \Phi_i(x_i)$, $\Delta \alpha_k = \eta y^k$. Normal perceptron: $z < 0$, update if misclassified. Large-margin: $z < 1$, update if misclassified or within margin. Optimum margin: $min(z)$, only update if closest point to margin.
+
+\textbf{Linear SVM} Fits a hyperplane to separate and classify data. Soft-margin hyperparameter $C$ represents tradeoff between robustness and fit. Minimizes $1/\text{margin} + C(\text{training error})$. Approaches hard margin as $C\rightarrow\infty$, and vice versa
+
+\textbf{Newton's Method} $w \leftarrow w - H^{-1}\nabla_w R$
+
+\textbf{Stochastic Gradient Descent} $\Delta w_i = -\eta \partial L / \partial w_i$. Obtain dual form $\Delta \alpha$ by using kernel trick, NOT by differentiating loss. Does not exploit convexity of risk function; best approach for big data but NOT when N or d is small.
+
+\textbf{Update rules}:
+
+\begin{tabular}{@{}ll@{}}
+least mean squares:         & $\Delta w_i = \eta (y - f(x)) \Phi_i (x)$ \\
+                            & $\Delta \alpha_k = \eta (y^k - f(x^k))$
+\end{tabular}
+
+% =============================================================================
+
+\section{Risk Minimization}
+
+\textbf{Loss functions}
+
+\begin{tabular}{@{}ll@{}}
+Square          & $(1-z)^2$ \\
+Perceptron      & $max(0, -z)$ \\
+Hinge           & $max(0, 1-z)$ \\
+Logistic        & $\ln(1+e^{-z})$ \\
+Adaboost        & $e^{-z}$
+\end{tabular}
+
+
+\textbf{Risk/Loss Functionals}
+
+\begin{tabular}{@{}ll@{}}
+functional margin       & $z = y f(x), y=\pm 1$ \\
+risk                    & $(1/N)\sum_{k=1:N} L(f(x^k, w), y^k)$ \\
+batch gradient          & $w \leftarrow w - \eta\nabla_w R$ \\
+stochastic gradient     & $w \leftarrow w - \eta\nabla_w L$ \\
+SRM/regularization      & $w_i \leftarrow (1 - \gamma) w_i - \eta \partial R_{train} / \partial w_j$ \\
+linear discriminant     & $f(x) = \sum_i w_i x_i = wx$ \\
+\end{tabular}
+
+\textbf{Regularization} penalizes model complexity at expense of more training error, often explicitly part of loss function. Takes the form of shrinkage (weight decay, ridge regression, SVM), feature selection, kernel parameters, etc.
+
+\textbf{Risk Types}
+
+guaranteed risk: $R_{gua}[f] = R_{train}[f] + \epsilon (\delta, C/N)$ with high probability $(1-\delta)$ \\
+regularized risk: $R_{reg}[f] = R_{train}[f] + \lambda \lVert w \rVert^2$
+
+\textbf{Norms} $\lVert x \rVert_p = (|x_1|^p + |x_2|^p + \cdots)^{1/p}$
+
+\begin{tabular}{@{}ll@{}}
+$L_0$ norm          & penalizes number of features considered \\
+$L_1$ norm (lasso)  & makes weight vector more sparse \\
+$L_2$ norm (ridge)  & shrinks weight vector to reduce variance \\
+\end{tabular}
+
+% =============================================================================
+
+\section{Logistic Regression}
+
+Like Hebb's rule but weighted; misclassifications are more heavily weighted (multiplied by $S(-z)$). A link function links the functional margin $z$ and the likelihood $P(D|f)$.
+
+\textbf{Linear logistic regression} log odds ratio (logit) is a linear function of x, $\ln [P_f (Y=1 | X=x) / P_f (Y=-1 | X=x)] = w \cdot x + b$
+
+\textbf{Logistic function} $S(t) = g^{-1}(t) = 1 / (1+e^{-t})$
+
+\begin{align*}
+\Delta w_i &= -\eta \partial L  / \partial w_i 
+= -\eta \partial L / \partial z \cdot \partial z / \partial w_i \\
+&= \eta S(-z) y x_i
+\end{align*}
+
+Update equations with shrinkage:
+
+\begin{align*}
+\Delta w_i &= (-\gamma w_i) + \eta S(-z) y \Phi_i (x) \\
+\Delta \alpha_k &= (-\gamma \alpha_k) + \eta S(-z) y^k \text{ for example k} \\
+\Delta \alpha_h &= (-\gamma \alpha_h) \text{ for other examples}
+\end{align*}
+
+% =============================================================================
+
+\section{Ridge Regression}
+
+$\sum_i w_i x^k_i = y^k$ for all $k=1..m$
+
+\begin{align*}
+Xw^T &= y \\
+X^T X w^T &= X^T y \\
+w^T &= (X^T X)^{-1} X^T y
+\end{align*}
+
+\textbf{Optimal solution}: $w^T = X^+ y$
+
+\textbf{Residual} $y-\hat{y} = (I-XX^+)y$
+
+\textbf{Pseudo-inverse}
+
+Case 1) $N > d$ overdetermined, no exact solution. Optimal RSS solution is
+
+$X^+ = \lim_{\lambda \rightarrow 0} (X^T X + \lambda I)^{-1} X^T$
+
+Case 2) $N < d$ underdetermined, optimize for $\min(\lVert w \rVert)$
+
+$X^+ = \lim_{\lambda \rightarrow 0} X^T(XX^T + \lambda I)^{-1}$
+
+Not limit when $\lambda \rightarrow 0$, but find optimal value through cross-validation.
+
+\textbf{Kernel trick} In case 2 where $N << d$, dimensionality of features can approach $\infty$. Instead, replace $XX^T$ by a $(N, N)$ kernel matrix $K = k(x^k, x^h)$. $\alpha = (K + \lambda I)^{-1} y$ yields the nonlinear regression function $f(x) = \sum_k \alpha_k k(x, x_k)$.
+
+\textbf{Principal Component Analysis (PCA)} decrease dimensionality of features by constructing linear combinations of the features such that the reconstructed patterns are as close as possible to the original features (minimize RSS). Accomplishes this by removing the dimensions with the smallest eigenvalues (smallest variance, affects the data the least).
+
+PCA Solution: $X' = XU$, $X'' = X' U^T = XUU^T$, $min_U \lVert X - XUU^T \rVert^2$
+
+% =============================================================================
+
+\section{Kernel Machines}
+
+\textbf{Kernels} similarity measure between two datapoints, dot product in some (potentially infinite) feature space: $k(s, t) = \Phi(s) \cdot \Phi(t)$ (don't need to know $\Phi$ representation), good kernels are symmetric: $k(x, x') = k(x', x)$, kernel matrix should be invertible, possibly after regularization ($K+\lambda I$). Satisfied if matrix is PSD, all eigenvalues $\lambda_i > 0$.
+
+\textbf{Kernel Trick}
+
+\begin{tabular}{@{}ll@{}}
+parametric      & $f(x)=w \cdot \Phi(x)$ \\
+                & $w = \sum_k \alpha_k \Phi(x^k)$ \\
+non-parametric  & $f(x) = \sum_k \alpha_k k(x^k, x)$ \\
+                & $k(x^k, x) = \Phi(x^k) \cdot \Phi(x)$
+\end{tabular}
+
+\textbf{Parzen window} $f(x) = \sum_{k=1:N} y_k k(x, x_k)$
+
+\textbf{Radial kernels}
+
+\begin{tabular}{@{}ll@{}}
+Top-hat     & $k(x, x_k) = 1(\lVert x - x_k \rVert^2 < \sigma^2)$ \\
+Gaussian    & $\exp -(\lVert x - x_k \rVert^2 / 2\sigma^2)$
+\end{tabular}
+
+
+\textbf{Non-radial kernels}
+
+\begin{tabular}{@{}ll@{}}
+Linear      & $k(x, x_k) = x \cdot x_k$ \\
+Polynomial  & $k(x, x_k) = (1 + x \cdot x_k)^q$
+\end{tabular}
+
+% =============================================================================
+
+\section{Bayesian Decision Theory}
+
+\textbf{Assumptions} Datasets should be IID for naive Bayes.
+
+\textbf{Bonferroni Correction}: $p' = mp$, where we use $m$ classifiers.
+
+% =============================================================================
+
+\section{Performance Evaluation}
+
+\textbf{Metrics} error rate, bit-error rate (BER), cross-entropy, area under the ROC curve (AUC), $R^2$
+
+\textbf{Error bar} $\Sigma$ of the error rate is $\sqrt{E(1-E)/n}$
+
+\textbf{Sample size} Number of test examples needed is inversely proportional to error rate. Rule of thumb: $n = 100/E$
+
+% =============================================================================
+
+\section{Model Selection}
+
+\textbf{Filters} reduce number of hyperparameters by measuring feature relevance. Does not make use of the learning machine, uses statistics instead. Techniques used are prior knowledge, unsupervised learning to reduce dimensionality of input space, transfer learning, meta-learning, surrogate learning machines
+
+\textbf{Wrappers} use the learning machine to evaluate the performance of alternative feature subsets. Use a search method to explore the space of possible subsets. Considered a black box, no knowledge of the learning algorithm is needed to apply this method.
+
+\textbf{Embedded methods} reduce the number of hyperparameters as much as possible before passing into wrapper method (too many hyperparameters leads to overfitting). Pushes hyperparameters to a lower level and have them estimated in the process of learning parameters. This cannot be done by optimizing the training error; need two levels of inference in order to enjoy finite capacity of the learning problem. Optimizing the kernel parameters (kernel with in the Gaussian kernel or degree in the polynomial kernel) leads to infinite VC dimension (can learn perfectly any training set); optimizing the ridge or regularization parameter $\Lambda$ leads to zero capacity ($w=0$ is the optimum).
+
+\textbf{Search strategies} grid search, simulated annealing, pattern search
+
+\textbf{Voting methods} multiple models cast a vote for a class, classifier weighs each vote and makes a decision.
+
+% =============================================================================
+
+\section{Gaussian Classification}
+
+Assumptions: Generating model (draw $y$ first, draw $x$ given $y$), variance in dataset explained by Gaussian noise, independence of features in given class (no covariance), same variance for all classes. NOT optimum Bayes classifier because assumptions almost always violated. We can post-fit bias term by adjusting the threshold. If two classes have same variance, Gaussian classifier is a linear discriminant (equivalent to centroid method, Hebb's rule with target values $y^k = 1/N_1$ if in class 1 and $-1/N_0$ otherwise). Posterior of Gaussian model is logistic with Poisson or Gaussian class conditionals.
+
+\textbf{Bayes' rule} $P(Y=y | X=x) ~ P(Y=y)P(X=x | Y=y)$
+
+\textbf{Prior} $P(Y=y)$, relative class abundance (occurrences over total count)
+
+\textbf{Likelihood} $P(X=x|Y=y)$, probability $x$ belongs to class $y$, proportional to $\exp(-\lVert x - \mu^{|y|} \rVert^2 / 2\sigma^2)$, Gaussian noise model
+
+% =============================================================================
+
+\section{Linear Discriminant Analysis}
+
+\textbf{Centering}: subtracting mean of the features
+
+\textbf{Standardizing} sphering; subtracting by mean, dividing by standard deviation (component-wise), $\Phi(x^k) = (x^k - \mu) / \sigma$
+
+\textbf{Principal axes} Diagonalize $\Sigma = X^T X = US^2 U^T$, where $U$ is an orthogonal matrix of column eigenvectors such that $U^T U = I$ and $S^2$ is a diagonal matrix of positive eigenvalues $s_i^2$. Matrix $R = USU^T = \Sigma^{1/2}$. To obtain a diagonal covariance matrix $S$, $\Phi = XU$. To axis-align the Gaussian, apply $U^{-1}(X-\mu)$
+
+\textbf{Whitening} multiply by square root of inverse covariance matrix, $\Phi = X(X^T X)^{-1/2} = XR^{-1} = X\Sigma^{-1/2}$
+
+\textbf{Linear Discriminant Analysis} Generalization of Gaussian classifier for cases where the input variables aren't statistically independent, but all classes have same covariance matrix $\Sigma$. Once the input space is rotated into the principal axes of the covariance matrix and rescaled by the eigenvalues, LDA is like the isotropic Gaussian classifier (centroid method). Useful for multi-class classification and data visualization.
+
+Rotate input space, then find the direction that maximizes the ratio of the between class variance over the within class variance.
+
+\begin{equation*}
+max\left(\frac{(\mu_1 - \mu_2)^2}{\sigma_1^2 + \sigma_2^2}\right)
+\end{equation*}
+
+PCA, ridge regression use covariance matrix of all data combined. LCA uses pooled, within-class covariance. In both cases, whitening is applied with $\Phi = X \Sigma ^{-1/2}$. 
+
+% =============================================================================
+
+\section{Dimensionality Reduction}
+
+
+
+
+% =============================================================================
+
+\section{Decision Trees}
+
+\textbf{Random Forests}: 
+
+\textbf{Boosting}: Weight weak learners according to how well they perform on certain parts of the 
+
+
+\textbf{AdaBoost}: 
+
+\textbf{Lagrange Multiplier}: To maximize $f(x, y)$ subject to constraint $g(x, y) = 0$, examine the equation using a Lagrange multiplier: $\Lagr(x, y, \lambda) = f(x, y) + \lambda g(x, y)$. Then, take the derivative of the equation with respect to $x$, $y$, and $\lambda$.
+
+% =============================================================================
+
+\section{Singular Value Decomposition}
+
+Left singular vectors of $M$ are eigenvectors of $MM^{T}$. Right singular vectors are eigenvectors of $M^{T}M$. Non-zero singular values are the square roots of the nonzero eigenvalues of both $MM^{T}$ and $M^{T}M$.
+
+
+% =============================================================================
+
+\section{Neural Networks}
+
+\subsection{Nonlinearities}
+
+\textbf{Sigmoid}: $1 / (1 + e^{-t})$
+
+\textbf{ReLu}: 
+
+
+
+% =============================================================================
+
+
+\end{multicols}
+\end{document}
