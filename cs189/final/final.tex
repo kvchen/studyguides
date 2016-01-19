@@ -1,4 +1,5 @@
-\documentclass[10pt,landscape]{article}
+\documentclass[9pt,landscape]{extarticle}
+% \usepackage{extsizes}
 \usepackage[utf8]{inputenc}
 \usepackage{multicol}
 \usepackage{calc}
@@ -26,15 +27,15 @@
 \renewcommand{\section}{\@startsection{section}{1}{0mm}%
                                 {-1ex plus -.5ex minus -.2ex}%
                                 {0.5ex plus .2ex}%x
-                                {\normalfont\large\bfseries}}
+                                {\normalfont\normalsize\bfseries}}
 \renewcommand{\subsection}{\@startsection{subsection}{2}{0mm}%
                                 {-1explus -.5ex minus -.2ex}%
                                 {0.5ex plus .2ex}%
-                                {\normalfont\normalsize\bfseries}}
+                                {\normalfont\small\bfseries}}
 \renewcommand{\subsubsection}{\@startsection{subsubsection}{3}{0mm}%
                                 {-1ex plus -.5ex minus -.2ex}%
                                 {1ex plus .2ex}%
-                                {\normalfont\small\bfseries}}
+                                {\normalfont\tiny\bfseries}}
 \makeatother
 
 % Define BibTeX command
@@ -52,6 +53,7 @@
 % Study guide commands
 
 \newcommand{\Lagr}{\mathcal{L}}
+\newcommand{\idx}[1]{^{(#1)}}
 
 % =============================================================================
 
@@ -61,7 +63,6 @@
 \footnotesize
 \begin{multicols}{3}
 
-
 % multicol parameters
 % These lengths are set only within the two main columns
 %\setlength{\columnseprule}{0.25pt}
@@ -70,30 +71,25 @@
 \setlength{\multicolsep}{1pt}
 \setlength{\columnsep}{2pt}
 
-\begin{center}
-\textbf{CS189 Midterm 1 Study Guide}
-\end{center}
-
-
 % =============================================================================
 
 \section{Equations}
-
-\textbf{Probability}
 
 \begin{tabular}{@{}ll@{}}
 Bayes' rule         & $P(A|B) = P(A)P(B|A) / P(B)$ \\
 Expected value      & $\mathbb{E}[cX] = c\mathbb{E}[X]$ \\
 Variance            & $Var(X) = E[(X-E[X])^2] = \sigma^2$ \\
+                    & $Var(X) = E[X^2] - (E[X])^2$ \\
                     & $Var(cX) = c^2 Var(X)$ \\
 Covariance          & $\mathbb{E}[(x_i - \mu_i)(x_j - \mu_j)]$ \\
 Covariance matrix   & $X^T X = US^2 U^T$ for centered dataset \\
                     & $\sigma_{ij} = \frac{1}{N}\sum_{k=1:N} (x_i^k - \mu_i)(x_j^k - \mu_{xj})$ \\
 Hessian             & $[\partial^2 R / \partial w_i \partial w_j]$ \\
-Hessian matrix      & $\partial^2 R / \partial w^2$
+Hessian matrix      & $\partial^2 R / \partial w^2$ \\
+p-norm              & $||x - y||_p = (\sum_{j=1}^{d} |x_j - y_j|^p)^{1/p}$ \\
 \end{tabular}
 
-\textbf{Distributions}
+\subsection{Distributions}
 
 \begin{tabular}{@{}ll@{}}
 Isotropic normal        & $\frac{1}{\sigma \sqrt{2\pi}}\exp(-(x-\mu)^2 / (2\sigma^2))$ \\
@@ -101,7 +97,7 @@ Multivariate normal     & $\frac{1}{\sqrt{(2\pi)^k |\Sigma|}} \exp(-\frac{1}{2}(
 Poisson distribution    & $p(x, \lambda) = (e^{-\lambda}\lambda^x)/x!$ \\
 \end{tabular}
 
-\textbf{Matrices}:
+\subsection{Matrices}
 
 \begin{tabular}{@{}ll@{}}
 $(AB)^T$                            & $B^T A^T$ \\
@@ -112,21 +108,35 @@ $\partial Trace(XA) / \partial X$   & $A^T$ \\
 $\partial(a^T Xb) / \partial X$     & $ab^T$
 \end{tabular}
 
+% =============================================================================
+
+\section{Miscellaneous Notes}
+
+\textbf{Posterior} $P(Y=i | x)$
+
+% =============================================================================
+
+\section{Techniques}
+
 \textbf{Maximum Likelihood Estimation} Find likelihood function, take negative log likelihood, take derivative with respect to optimized parameter. Set derivative to 0. $argmax[P(data|model)]$
 
 \textbf{Maximum A Posteriori (MAP)} $argmin [-\log P(D|f) (-\log P(f))]$. $-\log P(f)$ serves the role of regularizer. $argmax[P(data|model)P(model)]$
 
+\textbf{Lagrange Multiplier} To maximize $f(x, y)$ subject to constraint $g(x, y) = 0$, examine the equation using a Lagrange multiplier: $\Lagr(x, y, \lambda) = f(x, y) + \lambda g(x, y)$. Then, take the derivative of the equation with respect to $x$, $y$, and $\lambda$.
+
 % =============================================================================
 
-\section{Training Methods}
+\section{Linear Models}
+
+\textbf{Centroid method} Find class centroids, subtract one centroid from the other to get weight vector, construct separating hyperplane with $f(x) = w \cdot x = 0$. Equivalent to Hebb's rule with equal number of points.
+
+\textbf{Linear SVM} Fits a hyperplane to separate and classify data. Soft-margin hyperparameter $C$ represents tradeoff between robustness and fit. Minimizes $1/\text{margin} + C(\text{training error})$. Approaches hard margin as $C\rightarrow\infty$, and vice versa. Classify new points via $sign(\sum_{i=1}^{n}\alpha_i K(x\idx{i}, x))$.
 
 \textbf{Hebb's rule} $w = \sum_k y^k x^k$, $w \leftarrow w + y^k \Phi(x^k)$, $\alpha^k \leftarrow \alpha^k + y^k$
 
-\textbf{Weight decay} $w_i \leftarrow (1 - \gamma) w_i + y^k x_i^k$
-
 \textbf{Perceptron algorithm} Always finds separating hyperplane if samples linearly separable. Equations: $\Delta w_i = \eta y \Phi_i(x_i)$, $\Delta \alpha_k = \eta y^k$. Normal perceptron: $z < 0$, update if misclassified. Large-margin: $z < 1$, update if misclassified or within margin. Optimum margin: $min(z)$, only update if closest point to margin.
 
-\textbf{Linear SVM} Fits a hyperplane to separate and classify data. Soft-margin hyperparameter $C$ represents tradeoff between robustness and fit. Minimizes $1/\text{margin} + C(\text{training error})$. Approaches hard margin as $C\rightarrow\infty$, and vice versa
+% =============================================================================
 
 \textbf{Newton's Method} $w \leftarrow w - H^{-1}\nabla_w R$
 
@@ -141,20 +151,53 @@ least mean squares:         & $\Delta w_i = \eta (y - f(x)) \Phi_i (x)$ \\
 
 % =============================================================================
 
+\section{Kernels}
+
+Measure similarity between two datapoints. Represents a dot product in some (potentially infinite) feature space: $k(s, t) = \Phi(s) \cdot \Phi(t)$ (don't need to know $\Phi$ representation). Good kernels are symmetric: $k(x, x') = k(x', x)$. Kernel matrix should be invertible, possibly after regularization ($K+\lambda I$). Satisfied if matrix is PSD, all eigenvalues $\lambda_i > 0$.
+
+\subsection{Kernel Trick}
+
+\begin{tabular}{@{}ll@{}}
+parametric      & $f(x)=w \cdot \Phi(x)$ \\
+                & $w = \sum_k \alpha_k \Phi(x^k)$ \\
+non-parametric  & $f(x) = \sum_k \alpha_k k(x^k, x)$ \\
+                & $k(x^k, x) = \Phi(x^k) \cdot \Phi(x)$
+\end{tabular}
+
+\textbf{Parzen window} $f(x) = \sum_{k=1:N} y_k k(x, x_k)$
+
+\textbf{Radial kernels}
+
+\begin{tabular}{@{}ll@{}}
+Top-hat     & $k(x, x_k) = 1(\lVert x - x_k \rVert^2 < \sigma^2)$ \\
+Gaussian    & $\exp -(\lVert x - x_k \rVert^2 / 2\sigma^2)$
+\end{tabular}
+
+
+\textbf{Non-radial kernels}
+
+\begin{tabular}{@{}ll@{}}
+Linear      & $k(x, x_k) = x \cdot x_k$ \\
+Polynomial  & $k(x, x_k) = (1 + x \cdot x_k)^q$
+\end{tabular}
+% =============================================================================
+
 \section{Risk Minimization}
 
-\textbf{Loss functions}
+As model complexity increases, bias decreases while variance increases.
+
+\subsection{Loss functions}
 
 \begin{tabular}{@{}ll@{}}
 Square          & $(1-z)^2$ \\
 Perceptron      & $max(0, -z)$ \\
 Hinge           & $max(0, 1-z)$ \\
-Logistic        & $\ln(1+e^{-z})$ \\
+Logistic        & $\log(1+e^{-z})$ \\
 Adaboost        & $e^{-z}$
 \end{tabular}
 
 
-\textbf{Risk/Loss Functionals}
+\subsection{Risk/Loss Functionals}
 
 \begin{tabular}{@{}ll@{}}
 functional margin       & $z = y f(x), y=\pm 1$ \\
@@ -189,6 +232,12 @@ Like Hebb's rule but weighted; misclassifications are more heavily weighted (mul
 \textbf{Linear logistic regression} log odds ratio (logit) is a linear function of x, $\ln [P_f (Y=1 | X=x) / P_f (Y=-1 | X=x)] = w \cdot x + b$
 
 \textbf{Logistic function} $S(t) = g^{-1}(t) = 1 / (1+e^{-t})$
+
+Training finds the optimal $\beta$ value such that if $P(Y=1 | x) > 0.5$, output 1; otherwise, output 0.
+
+\begin{equation}
+P(Y=1 | x) = 1 / (1 + \exp{-\beta^T x})
+\end{equation}
 
 \begin{align*}
 \Delta w_i &= -\eta \partial L  / \partial w_i 
@@ -240,39 +289,9 @@ PCA Solution: $X' = XU$, $X'' = X' U^T = XUU^T$, $min_U \lVert X - XUU^T \rVert^
 
 % =============================================================================
 
-\section{Kernel Machines}
-
-\textbf{Kernels} similarity measure between two datapoints, dot product in some (potentially infinite) feature space: $k(s, t) = \Phi(s) \cdot \Phi(t)$ (don't need to know $\Phi$ representation), good kernels are symmetric: $k(x, x') = k(x', x)$, kernel matrix should be invertible, possibly after regularization ($K+\lambda I$). Satisfied if matrix is PSD, all eigenvalues $\lambda_i > 0$.
-
-\textbf{Kernel Trick}
-
-\begin{tabular}{@{}ll@{}}
-parametric      & $f(x)=w \cdot \Phi(x)$ \\
-                & $w = \sum_k \alpha_k \Phi(x^k)$ \\
-non-parametric  & $f(x) = \sum_k \alpha_k k(x^k, x)$ \\
-                & $k(x^k, x) = \Phi(x^k) \cdot \Phi(x)$
-\end{tabular}
-
-\textbf{Parzen window} $f(x) = \sum_{k=1:N} y_k k(x, x_k)$
-
-\textbf{Radial kernels}
-
-\begin{tabular}{@{}ll@{}}
-Top-hat     & $k(x, x_k) = 1(\lVert x - x_k \rVert^2 < \sigma^2)$ \\
-Gaussian    & $\exp -(\lVert x - x_k \rVert^2 / 2\sigma^2)$
-\end{tabular}
-
-
-\textbf{Non-radial kernels}
-
-\begin{tabular}{@{}ll@{}}
-Linear      & $k(x, x_k) = x \cdot x_k$ \\
-Polynomial  & $k(x, x_k) = (1 + x \cdot x_k)^q$
-\end{tabular}
-
-% =============================================================================
-
 \section{Bayesian Decision Theory}
+
+\textbf{Optimal decision boundary} $P(Y=1 | x) = P(Y=-1 | x)$
 
 \textbf{Assumptions} Datasets should be IID for naive Bayes.
 
@@ -340,40 +359,73 @@ PCA, ridge regression use covariance matrix of all data combined. LCA uses poole
 
 \section{Dimensionality Reduction}
 
+\subsection{Singular Value Decomposition}
 
+Decomposition of $X = USV^{T}$. $X^{T}X = VSSV^{T} = VDV^{T}$, $XX^{T} = USSU^{T} = UDU^{T}$. Left singular vectors of $X$ are eigenvectors of $XX^{T}$. Right singular vectors are eigenvectors of $X^{T}X$. Non-zero singular values are the square roots of the nonzero eigenvalues of both $XX^{T}$ and $X^{T}X$. Calculate eigenvectors of $X^{T}X$ and put eigenvectors in rows for right singular matrix. To get left singular vectors (arranged in columns), use $u_i = Xv_i / \sigma_i$ where $\sigma_i$ is the square root of the eigenvalue.
 
+\subsection{Principal Component Analysis}
+
+Subtract mean from each point, (optionally) scale each dimension by its variance. Compute covariance matrix $C=X^{T}X$, then find the $k$ largest eigenvalues of $C = VDV^{T}$. Eigenvalue magnitude indicates variance along that axis.
 
 % =============================================================================
 
 \section{Decision Trees}
 
-\textbf{Random Forests}: 
+\textbf{Bagging} Generate bootstrap replicates of original training data by sampling with replacement.
 
-\textbf{Boosting}: Weight weak learners according to how well they perform on certain parts of the 
+\textbf{Random Forests} Ensemble method by creating multiple trees via bagging. Additional restriction that at each node, only a subset of splits is allowed. Each tree votes for a class, and the mode of votes is taken as the result. Used to lower variance on low-bias, high-variance random decision trees.
 
+\textbf{Boosting} Weight weak learners according to how well they perform on certain parts of the dataset. Points that were incorrectly classified are weighted more heavily on future update iterations. Creates a strong learner from a group of weak learners. Primarily reduces bias. Weights initialized to 1, then updated as $w_t \leftarrow w_t \exp{-y_t H_t}$.
 
-\textbf{AdaBoost}: 
-
-\textbf{Lagrange Multiplier}: To maximize $f(x, y)$ subject to constraint $g(x, y) = 0$, examine the equation using a Lagrange multiplier: $\Lagr(x, y, \lambda) = f(x, y) + \lambda g(x, y)$. Then, take the derivative of the equation with respect to $x$, $y$, and $\lambda$.
-
-% =============================================================================
-
-\section{Singular Value Decomposition}
-
-Left singular vectors of $M$ are eigenvectors of $MM^{T}$. Right singular vectors are eigenvectors of $M^{T}M$. Non-zero singular values are the square roots of the nonzero eigenvalues of both $MM^{T}$ and $M^{T}M$.
-
+\textbf{AdaBoost} The bigger the error $\epsilon$, the smaller the hypothesis weight multiplier $\alpha$ (the weights adapt to the error). Boosts examples if incorrectly predicted.
 
 % =============================================================================
 
 \section{Neural Networks}
 
+\subsection{Back-Propagation}
+
+\begin{equation}
+\frac{\partial J}{\partial w_{ij}\idx{l}} = \frac{\partial J(w)}{\partial s_{j}\idx{l}} \cdot \frac{\partial s_{j}\idx{l}}{\partial w_{ij}\idx{l}} = \frac{\partial J(w)}{\partial s_{j}\idx{l}} \cdot x\idx{l-1}
+\end{equation}
+
+\begin{equation}
+test
+\end{equation}
+
 \subsection{Nonlinearities}
 
-\textbf{Sigmoid}: $1 / (1 + e^{-t})$
+\textbf{Sigmoid} $s(t) = 1 / (1 + e^{-t}) \in [0, 1]$, $ds(t)/dt = s(t)(1-s(t))$. Gradients can become small for values away from 0, leading to vanishing gradient problem.
 
-\textbf{ReLu}: 
+\textbf{tanh} $tanh(t) \in [-1, 1]$
 
+\subsection{Convolutional Neural Nets}
 
+Used to combat curse of dimensionality, doesn't need as many weights as a normal neural net.
+
+\textbf{Convolution} Connectivity is local in space but full in depth. Number of parameters for each convolutional layer equals filter size times number of filters.
+
+\textbf{Pooling} Makes representations smaller without losing too much information. Does not have any weights (uses a function like max-pooling, L2 pooling, etc.).
+
+\textbf{Nonlinearities} functions are applied on every pixel of each layer after the pooling stage.
+
+% =============================================================================
+
+\section{Clustering}
+
+\textbf{k-nn} error is bounded by twice the Bayes risk.
+
+\textbf{k-means} Global minimization is NP-hard.
+
+\textbf{k-mediods}
+
+\textbf{Gaussian Mixture Models}
+
+\subsection{Nonparametric Density Estimation}
+
+\textbf{Histogramming}: Construct histogram from feature space by creating bins and counting points.
+
+\textbf{Kernel Density Estimation}: Histogram might have lots of empty bins; create Gaussians at every point, and combine them to create a density estimation with Parzen windows.
 
 % =============================================================================
 
