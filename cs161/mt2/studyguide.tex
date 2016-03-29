@@ -59,6 +59,7 @@
 \newcommand{\var}[1]{\text{Var(#1)}}
 \newcommand{\cov}[1]{\text{Cov(#1)}}
 \newcommand{\identity}{\mathbf{I}}
+\newcommand{\totient}{\varphi}
 
 % -----------------------------------------------------------------------
 
@@ -266,12 +267,101 @@ Can exploit both \textit{visual} and \textit{temporal} integrity. Visual is hidi
 \textit{Integrity}: prevent data from being altered \\
 \textit{Authenticity}: determine who created a document
 
+\subsection{Threat Models}
+
+\textit{Ciphertext-only attack}: Eve has managed to intercept a single encrypted message and wishes to recover the plaintext (the original message). \\
+\textit{Known plaintext attack}: Eve has intercepted an encrypted message and also already has some partial information about the plaintext, which helps with deducing the nature of the encryption. \\
+\textit{Chosen plaintext attack}: Eve can trick Alice to encrypt messages M1, M2, . . . , Mn of Eve’s choice, for which Eve can then observe the resulting ciphertexts (this might happen if Eve has access to the encryption system, or can generate external events that will lead Alice to sending predictable messages in response). At some other point in time, Alice encrypts a message M that is unknown to Eve; Eve intercepts the encryption of M and aims to recover M given what Eve has observed about the encryptions of M1, M2, . . . , Mn. \\
+\textit{Chosen ciphertext attack}: Eve can trick Bob into decrypting some ciphertexts C1, . . . , Cn. Eve would like to use this to learn the decryption of some other ciphertext C (different from C1, . . . , Cn). \\
+\textit{Chosen-plaintext/ciphertext attack}: A combination of cases 3 and 4: Eve can trick Alice into encrypting some messages of Eve’s choosing, and can trick Bob into decrypting some ciphertexts of Eve’s choosing. Eve would like to learn the decryption of some other ciphertext that was sent by Alice (and in particular did not occur as a result of Eve’s trickery).
+
+\subsection{Block Ciphers}
+
+Properties: correctness (bijective function), efficiency (both encryption/decryption in polynomial time), security (behaves like random permutation)
+
+\textit{Security game}: Attacker given 2 boxes, one for $E_k$ and one for random permutation. Must tell which is which. \\
+\textit{IND-CPA}: Probability of winning has to be less than $1/2 + \epsilon$. Requires that encryption scheme is randomized.
+
+\begin{enumerate}
+    \item Challenger generates $K_C$, $K_C^{-1}$. Gives $K_C$ to adversary.
+    \item Adversary can choose a bunch of plaintexts and ask for a polynomially bounded number of encryptions
+    \item Adversary submits two chosen plaintexts $M_0$ and $M_1$
+    \item Challenger selects random bit $b\in\{0, 1\}$ and sends ciphertext $C=Enc_{K_C^{-1}}(M_b)$ to adversary
+    \item Adversary can perform any additional encryptions/operations and outputs a guess $b$
+\end{enumerate}
+
+\textit{ECB mode}: Encryption: $C_i = E_K(M_i)$, Decryption: $M_i = D_K(C_i)$ \\
+\textit{CBC mode}: Encryption: $C_0 = IV, C_i = E_K(C_{i-1} \oplus M_i)$, Decryption: $M_0 = D_K(C_0) \oplus IV, M_i = C_{i-1} \oplus D_K(C_i)$ \\
+\textit{Output Feedback Mode}: Encryption: $Z_0 = IV, Z_i = E_K(Z_{i=1}), C_i = Z_i \oplus M_i$. \\
+\textit{CTR mode}: Encryption: $C_i = E_K(IV + i) \oplus M_i$, Decryption: $M_i = E_K(IV + i) \oplus C_i$
+
+\section{Public-Key Cryptography}
+
+\subsection{Number Theory}
+
+\textit{Euler's theorem}: if $gcd(x, n) = 1$, then $x^{\totient(n)} = 1 \pmod{n}$. \\
+If $p$ and $q$ are two different odd primes, then $\totient(pq) = (p-1)(q-1)$. \\
+If $p \equiv 2 \pmod{3}$ and $q \equiv 2 \pmod{3}$ then we can efficiently compute $d$ given $\totient(pq)$ such that $3d = 1 \pmod{\totient(pq)}$ \\
+\textit{Discrete Logarithm problem}: Finding $a$ such that $A = g^a \pmod{p}$ is computationally hard.
+
+\subsection{RSA Encryption}
+
+\textit{RSA keypair generation}: Choose two distinct prime numbers p and q. Should be chosen at random, similar in magnitude, but differ in length by a few digits. Compute $n = pq$, which is used as the modulus for public/private keys. Compute $\totient(n) = \totient(p)\totient(q) = (p-1)(q-1) = n -(p+1-q)$. Choose $e$ such that $1 < e < \totient(n)$ and $gcd(e, \totient(n)) = 1$ so $e$ and $\totient(n)$ are coprime. Determine $d = e^{-1} \pmod{\totient(n)}$, so $d$ is multiplicative inverse of $e \pmod{\totient(n)}$ \\
+\textit{RSA encryption}: $c \equiv m^e \pmod{n}$, $c^d \equiv (m^e)^d \equiv m \pmod{n}$
+
+\subsection{Diffie-Hellman Exchange}
+
+\textit{Diffie-Hellman exchange}: System parameters: agree on a 2048-bit prime $p$, a value $g$ in range $(2, p-2)$. Both arbitrary, fixed, public. Key agreement protocol: Alice randomly picks $a \in \{0, p-2\}$ and sends $A = g^a \pmod{p}$ to Bob. Bob picks $b \in \{0, p-2\}$ and sends $B = g^b \pmod{p}$. Alice computes $K = B^a \pmod{p}$, Bob computes $K = A^b \pmod{p}$. \\
+\textit{ElGamal encryption}: System parameters: agree on 2048-bit prime $p$, a value $g \in \{2, p-2\}$. Both arbitrary, fixed, public. Key generation: Bob picks $b \in \{0..p-2\}$ randomly and computes $B = g^b \pmod{p}$. Public key is $B$ and private key is $b$. Encryption: $E_B(m) = (g^r \pmod{p}, m \times B^r \pmod{p})$ where random $r \in \{0..p-2\}$. Decryption: $D_b(R, S) = R^{-b} \times S \pmod{p}$
+
+
 \subsection{Cryptographic Hash Functions}
 
-\textit{One-way}: \\
-\textit{Second preimage-resistant}: \\
-\textit{One-way}: \\
+\textit{One-way}: Infeasible to find input $x$ such that $y = H(x)$. \\
+\textit{Second preimage-resistant}: Given a message $x$, it is infeasible to find another message $x'$ such that $x' \ne x$ but $H(x) = H(x')$. \\
+\textit{Collision resistant}: It is infeasible to find \textit{any} pair of messages $x, x'$ such that $x' \ne x$ but $H(x) = H(x')$. \\
 
+
+% =============================================================================
+
+\section{Networking}
+
+\textit{Layers}: Physical, link, (inter)network, transport, application
+\textit{Packet headers}: Link, (inter)network/IP, transport layer, application data
+
+\subsection{Security Goals}
+
+\textit{Confidentiality}: No unauthorized reading of data/communication \\
+\textit{Integrity}: No unauthorized manipulation of data/processing/communications \\
+\textit{Availability}: We can access data/processing/communications when we want
+
+\subsection{Link-Layer Threats}
+
+\textit{Sniffing}: Eavesdropping (free for subnets on broadcast technologies, since NIC captures all traffic) \\
+\textit{Jamming}: Denial of service, drops packets \\
+\textit{Spoofing}: Inject packet with faked source address. Easy for on-path attackers, can adjust communication to match eavesdropped traffic
+
+\subsection{IP-Layer Threats}
+
+\textit{Spoofing}: Change identity, so receiver doesn't know who you are \\
+\textit{Scanning}: Brute force search for host by spoofing destination address \\
+\textit{Flooding}: No tracking for overuse or consent, so denial of service possible \\
+\textit{Router manipulation}: Hard, change routing for victim to go through attacker \\
+\textit{DHCP spoofing}: Race legitimate DNS server to respond to request for a DNS server, substitute with fake. Intercept all of host's off-subnet traffic and MITM between client and server, modify in any way
+
+\subsection{Transport-Layer Threats}
+
+\textit{Connection hijacking}: If attacker knows ports/sequence numbers, can inject data into connection easily. Can also send a RST packet for denial of service attacks.
+
+
+% =============================================================================
+
+\section{Firewalls}
+
+\textit{Default-allow}: every network service is allowed unless explicitly blacklisted. Fails open, everything works but allows for security breach \\
+\textit{Default-deny}: every network service is denied unless explicitly allowed. Failure results in loss of functionality but not a security breach
+
+Most firewalls use default-deny. Network services identified using tuple (m=IP address of machine, r=protocol identifier (UDP, TCP, etc.), p=port number). Orthogonal system: Transparent to rest of system, much easier to retrofit onto older designs. Can be negative, bolt-on security with abstraction differences can lead to security holes. Central control, easy to deploy. Problems: Loss of network functionality, malicious insiders, some applications just end up tunneling traffic over universally trusted ports (e.g. 80, 443, etc.)
 
 % =============================================================================
 
