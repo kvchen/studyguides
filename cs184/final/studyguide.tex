@@ -2,11 +2,12 @@
 \usepackage[utf8]{inputenc}
 \usepackage{multicol}
 \usepackage{calc}
+\usepackage[compact]{titlesec}
 \usepackage{ifthen}
 \usepackage[landscape]{geometry}
 \usepackage{hyperref}
 \usepackage{amsmath, amssymb, amsthm, bm, hyperref, float, mathtools}
-% \usepackage{minted}
+\usepackage{minted}
 \usepackage{graphicx}
 \usepackage{enumitem}
 \usepackage{sectsty}
@@ -15,7 +16,7 @@
 \graphicspath{{images/}}
 
 % Remove extra spacing on bullet points
-\setlist[itemize]{nosep,leftmargin=*}
+\setlist[itemize]{nosep, leftmargin=*}
 
 % This sets page margins to .5 inch if using letter paper, and to 1cm
 % if using A4 paper. (This probably isn't strictly necessary.)
@@ -58,6 +59,8 @@
 \newcommand{\var}[1]{\text{Var(#1)}}
 \newcommand{\cov}[1]{\text{Cov(#1)}}
 \newcommand{\identity}{\mathbf{I}}
+\newcommand*\diff{\mathop{}\!\mathrm{d}}
+\newcommand*\Diff[1]{\mathop{}\!\mathrm{d^#1}}
 
 % -----------------------------------------------------------------------
 
@@ -74,25 +77,28 @@
 
 % =============================================================================
 
-\section{Sampling}
+\section{Equations}
 
-\textit{Antialiasing}: Removing frequencies above the Nyquist frequency (2 times the highest frequency) before sampling. Done by filtering before sampling. \\
-\textit{Line equation}: $L(x, y) = Ax + By + C$. On line: $L(x, y) = 0$, on right: $L(x, y) > 0$, on left: $L(x, y) < 0$. A point is inside a convex polygon if line tests for all lines (going clockwise) is greater than 0.
-
-\textit{Fourier transform}: $F(\omega) = \int_{-\infty}^{\infty} f(x) e^{-2\pi i \omega x} \,dx$ \\
-\textit{Inverse transform}: $f(x) = \int_{-\infty}^{\infty} F(\omega) e^{2\pi i \omega x} \,d\omega$ \\
+\textit{Fourier transform}: $F(\omega) = \int_{-\infty}^{\infty} f(x) e^{-2\pi i \omega x} \diff x$ \\
+\textit{Inverse transform}: $f(x) = \int_{-\infty}^{\infty} F(\omega) e^{2\pi i \omega x} \diff\omega$ \\
 \textit{Euler's formula}: $e^{ix} = \cos x + i\sin x$
 
 % =============================================================================
 
-\section{Transforms}
+\section{Rasterization}
 
-\textit{Homogeneous coordinates}: Points are defined as $(x, y, 1)$ and vectors by $(x, y, 0)$. Points and vectors don't reside on the same $xy$ plane. \\
-\textit{Affine transformations}: Consist of linear map and a translation. \\
-\textit{Camera transformations}: Given eye point $e$, up vector $u$, view direction $v$, where $u$ and $v$ are orthonormal, find right vector $r = v \times u$. Transform camera $(e, r, u, v)$ to standard camera located at the origin, looking down the negative $z$-axis, where the up vector is the $y$-axis.
+\textbf{Antialiasing}: Removing frequencies above the Nyquist frequency (2 times the highest frequency) before sampling (Filtering before sampling) \\
+\textbf{Line equation}: $L(x, y) = Ax + By + C$. On line: $L(x, y) = 0$, on right: $L(x, y) > 0$, on left: $L(x, y) < 0$. A point is inside a convex polygon if line tests for all lines (going clockwise) is greater than 0.
 
-\subsection{Transform Order}
+% =============================================================================
 
+\section{Geometry}
+
+\subsection{Transforms}
+
+\textbf{Homogeneous coordinates}: Points are defined as $(x, y, z, 1)$ and vectors by $(x, y, z, 0)$. \\
+
+\textbf{Transformation Order}:
 \begin{itemize}[nosep]
     \item Object coordinates: Apply modeling transforms
     \item World (scene) coordinates: Apply viewing transform
@@ -101,7 +107,7 @@
     \item Screen coordinates: Rasterization
 \end{itemize}
 
-\subsection{Basic Transformations}
+\subsubsection{Basic Transformations}
 
 \begin{multicols}{2}
 
@@ -140,6 +146,24 @@ $$\begin{bmatrix}
 \end{bmatrix}$$
 
 \end{multicols}
+
+
+
+% =============================================================================
+
+\section{Rendering}
+
+% =============================================================================
+
+\section{Animation}
+
+% =============================================================================
+
+\section{Cameras}
+
+% =============================================================================
+
+
 
 \subsection{Coordinate System Transform}
 
@@ -236,11 +260,11 @@ $$\alpha + \beta + \gamma = 1$$
 \end{align*}
 
 \begin{multicols}{3}
-    $\alpha &= \frac{A_A}{A_A + A_B + A_C}$
+    $\alpha = \frac{A_A}{A_A + A_B + A_C}$
     \columnbreak
-    $\beta &= \frac{A_B}{A_A + A_B + A_C}$
+    $\beta = \frac{A_B}{A_A + A_B + A_C}$
     \columnbreak
-    $\gamma &= \frac{A_C}{A_A + A_B + A_C}$
+    $\gamma = \frac{A_C}{A_A + A_B + A_C}$
 \end{multicols}
 
 \subsection{Texture Sampling}
