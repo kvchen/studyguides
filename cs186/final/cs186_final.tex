@@ -104,9 +104,9 @@ Heapsort: Keep two heaps $H1$ and $H2$ in memory, read $B-2$ pages and insert in
 
 \textbf{Hashing}
 
-Many operations don't require order, so sorting is unnecessary. Use hashing to rendevous matches. $4*N$ I/Os.
+Many operations don't require order, so sorting is unnecessary. Use hashing to rendevous matches. $4*N$ I/Os. Can hash $B(B-1)$ pages in 2 passes.
 
-\textit{Partition (divide)}: Use a hash function to stream records into $B-1$ disk partitions \\
+\textit{Partition (divide)}: Use a hash function to stream records into $B-1$ disk partitions, each no more than $B$ pages in size \\
 \textit{Rehash (conquer)}: Rehash each partition into RAM partitions using a different hashing function
 
 \textit{Recursive Partitioning}: If disk partition too big after pass 0, divide partition using a different hash function.
@@ -343,7 +343,7 @@ Transaction either commits or aborts (or system crash during xact, treat as abor
 \textit{Equivalent}: Involve some actions of same xacts, leave DB in same state \\
 \textit{Conflict equivalent}: involve same actions of same transactions, every pair of conflicting actions ordered the same way \\
 \textit{View serializability}: Same initial reads: $T_i$ reads initial value of A in $S_1$, then $T_i$ also reads initial value of A in $S_2$. Same dependent reads: If $T_i$ reads value of A written by $T_j$ in $S_1$, then $T_i$ also reads value of A written by $T_j$ in $S_2$. Same winning writes: If $T_i$ writes final value of A in $S_1$, then $T_i$ also writes final value of A in $S_2$. \\
-\textit{Dependency graph}: One node per xact, edge from $T_i$ to $T_j$ if an earlier operation of $T_i$ conflicts with an operation of $T_j$. Conflict-serializable iff dependency graph is acyclic \\
+\textit{Dependency graph}: One node per xact, edge from $T_i$ to $T_j$ if an earlier operation of $T_i$ conflicts with an operation of $T_j$. Conflict-serializable iff dependency graph is acyclic. Linearize dependency graph to get conflict-equivalent serial schedule of transactions \\
 \textit{Waits-for graph}: Edge from $T_i$ to $T_j$ means that $T_j$ is holding a resource that $T_i$ needs, and $T_i$ is waiting on $T_j$. Periodically check for cycles in the graph and kill a transaction in the cycle. \\
 \textit{Two-phase locking}: xact must get a shared lock before reading, exclusive lock before writing. Cannot get new locks after releasing any locks. Does not prevent cascading aborts. \\
 \textit{Strict 2PL}: Locks released only when xact completes (commit or abort). Prevents cascading aborts. \\
@@ -376,7 +376,7 @@ Transaction either commits or aborts (or system crash during xact, treat as abor
 
 \textit{Analysis}: Start at last checkpoint. Re-establish knowledge of state at checkpoint via transaction table and dirty page table stored in checkpoint. Scan log forward from checkpoint. End record: remove xact from xact table (done). Other records add xact to xact table, set lastLSN = LSN, change xact status on commit. For update records: if P not in dirty page table, add P to DPT, set recLSN = LSN. recLSN is first LSN that caused page to become dirty. At end of analysis, xact table says which xacts were active at last log flush before crash. DPT says which dirty pages might not have made it to disk. \\
 \textit{Redo}: Repeat history to reconstruct state at crash. Reapply all updates (even of aborted xacts), redo CLRs. Scan forward from log rec containing smallest recLSN in DPT. For each update log/CLR with given LSN, redo unless: (Affected page not in DPT, affected page in DPT but $recLSN > LSN$, $pageLSN(inDB) \ge LSN$ (slow!)). For each redo action, reapply logged action and set pageLSN to LSN. No additional logging/forcing. At end of redo phase, end type records are written for all transactions with committed status. \\
-\textit{Undo}: Effects of failed xacts. Keep track of toUndo set: lastLSNs of all xacts in xact table. Repeat until toUndo is empty: Pop largest LSN among toUndo. If LSN is CLR and undoNextLSN = NULL: write END record for xact. If LSN is CLR and undoNextLSN $\ne$ NULL: Add undoNextLSN to toUndo. Else: LSN is an update. Undo update, write CLR, add prevLSN to toUndo. Lets us do one backwards pass of the log.
+\textit{Undo}: Effects of failed xacts. Keep track of toUndo set: lastLSNs of all xacts in xact table. Repeat until toUndo is empty: Pop largest LSN among toUndo. If LSN is CLR and undoNextLSN = NULL: write END record for xact. If LSN is CLR and undoNextLSN $\ne$ NULL: Add undoNextLSN to toUndo. Else: LSN is an update. Undo update, write CLR, add prevLSN to toUndo. Lets us do one backwards pass of the log. Undo logs in the form (LSN, record, prevLSN, undoNextLSN), e.g. \texttt{(100, CLR: undo T3 LSN 70, 70, 40)}
 
 % =============================================================================
 
@@ -389,7 +389,10 @@ Transaction either commits or aborts (or system crash during xact, treat as abor
   \item Coordinator broadcasts either commit/abort depending on vote. Participants ack.
 \end{enumerate}
 
+\centerline{\includegraphics[width=.9\linewidth]{2pc.png}}
+
 \textit{Monotonic operator}: For an operation to be monotonic/eventually consistent, must be commutative, associative, and idempotent.
+\textit{NoSQL}: Like MongoDB, eventually consistent, faster write latency, highly available (horizontally scaling). Consistency requirements have to be added at the application level.
 
 % =============================================================================
 
@@ -412,9 +415,8 @@ Transaction either commits or aborts (or system crash during xact, treat as abor
 \textit{Association rule mining}: Identify predictive rules that relate a subset of items to the (likely) presence of other items in the basket. Does not imply causality! \\
 \textit{Machine learning pattern}: Query and aggregate function. Fits into MapReduce paradigm.
 
-\textbf{K-means clustering}
 
-\begin{verbatim}
+textbfrbatim}
 centers <- pick k initial centers
 while (centers changing):
   // compute assignments
@@ -424,6 +426,7 @@ while (centers changing):
   for i in range(k):
     centers[i] = mean([x for (x, c) in asg if c == i])
 \end{verbatim}
+
 
 \textbf{K-means++ algorithm}: Instead of picking centers randomly, initializes them to be far away from each other.
 
@@ -439,17 +442,19 @@ while len(centers) < k:
 
 \textit{Linear regression}: Model: $f_{\theta}(x) = \theta^T x$, $\theta_{MLE} = (X^T X)^{-1}X^T Y$. Optimal solution can be distributed, calculate $X^T X$ and $X^T$. Loss funtion is mean-squared error: $\frac{1}{n}\sum_{i=1}^n (y_i - f_{\theta}(x_i))^2$ \\
 \textit{Regularization}: Add additional $\lambda R(\theta)$ term. Larger value means lower variance, higher bias, less overfitting.
-
 % =============================================================================
 
-\section{Relational Modeling}
 
-\textit{Data models}: Connects concepts to bits.
+\textit{}Data models: Connects concepts to bits. \\
 
-\subsection{Entity-relationship diagrams}
+\textbf{}
+Entity-relationship diagram:
 
-\textit{Entity}: a real-world object described by a set of attribute values \\
-\textit{Entity set}: a collection of similar entities. All entities in the set have the same attributes, each entity set has a key (underlined), each attribute has a domain \\
+subsectionams
+
+\texti{{Entitlogical schema, not physical schema.y set}: a co
+
+Used to model llection of similar entities. All entities in the set have the same attributes, each entity set has a key (underlined), each attribute has a domain \\
 \textit{Relationship}: association among two or more entities. A relationship can have its own attributes. \\
 \textit{Relationship set}: collection of similar relationships. An n-ary relationship set $R$ relates $n$ entity sets $E_1, \ldots, E_n$ \\
 \textit{Key constraint}: at most one. Arrow pointing from A to B indicates that A has at most one B. \\
@@ -457,33 +462,122 @@ while len(centers) < k:
 \textit{Weak entity}: identified uniquely only by considering primary key of owner entity. Owner entity set and weak entity set must participate in 1-to-many relationship set (one owner, many weak entities). Weak entity set must have total participation in this identifying relationship set. Have a partial key denoted by a dashed underline. \\
 \textit{Aggregation}: Allows relationships with relationship sets \\
 
-% =============================================================================
 
-\section{Functional Dependencies}
+If $X \rightarrow Y$, then  indicates that if there are two tuples in $R$ with the same $X$ value, then they must have the same $Y$ value ()but not viecever versa. \\
 
-$X \rightarrow Y$ indicates that if there are two tuples in $R$ with the same $X$ value, then they must have the same $Y$ value (but not vice versa).
 
-\textit{Anomalies}: can violate dependencies during updates, insertions, and deletions. Additional work
+\textit{}Anomalies: Update ayAiescan ocviolate dependencies during updates, insertonions, and deltionetions. Additional work
 
-\textbf{Armstrong's axioms}
+\textit{}Armstrong'as axiomsbf
 
-\begin{itemize}
-  \item Reflexivity: if $X \supseteq Y$, then $X \rightarrow Y$
-  \item Augmentation: if $X \rightarrow Y$, then $XZ \rightarrow YZ$ for any $Z$
-  \item Transitivity: If $X \rightarrow Y$ and $Y \rightarrow Z$, then $X \rightarrow Z$
-\end{itemize}
+\begin{}itemize
 
-\textit{Union}: if $X \rightarrow Y$ and $X \rightarrow Z$, then $X \rightarrow YZ$ \\
-\textit{Decomposition}: if $X \rightarrow YZ$, then $X \rightarrow Y$ and $X \rightarrow Z$
+\end{}itemize  \item Reflexivity: if x $X \supseteq Y$ then $X \rightarrow Y$
+  \item Augmentation:
+  \item Transitivity: if $X \rightarrow Y$, then $XZ \rightarrow YZ$ for any $Z$If $X \rightarrow Y$ and $Y \rightarrow Z$, then $X \rightarrow Z$
+
+\item\textit{}Union: if $X \rightarrow Y$ and $X \rightarrow Z$, then $X \rightarrow YZ$ \\
+\teixtxit{}tit{}Decomposition: if $X \rightarrow YZ$, then $X \rightarrow Y$ and $X \rightarrow Z$
+
+
 
 \textit{Attribute closures}: Computing closure $F+$ of a set of FDs $F$ is exponential in number of attributes. To check closure of $X$, repeatedly add all attributes $A$ to $X$ such that $X \rightarrow A$ is in $F^+$. If $X^+ = R$, then $X$ is a superkey for $R$. $X$ is a candidate key if it is minimal.
 
 \textit{1st normal form}: all attributes atomic (relational model). Violated by many common data models, relational collection of structured objects. \\
-\textit{Boyce-Codd normal form (BCNF)}: $R$ is in BCNF if for all $X \rightarrow A$ in $F+$, $A \subseteq X$ (trivial fd) or $X is a superkey for R$. R is in BCNF is only non-trivial FDs over R are key constraints. Every field of every tuple records useful information that cannot be inferred via FDs alone. \\
+\textit{Third normal form}: $R$ is in 3NF if, for all $X \rightarrow A$ in $F+$, $A \in X$ (trivial FD), or X is a superkey of R, or A is part of some candidate key (not superkey) for R (A is prime). A lossless-join, dependency-preserving decomposition of R into a collection of 3NF relations always possible. \\
+\textit{Boyce-Codd normal form (BCNF)}: $R$ is in BCNF if for all $X \rightarrow A$ in $F+$, $A \subseteq X$ (trivial FD) or $X is a superkey for R$. R is in BCNF is only non-trivial FDs over R are key constraints. Every field of every tuple records useful information that cannot be inferred via FDs alone. \\
 \textit{Normalization}: decompose into multiple normalized relations. Suppose $R$ contains attributes $A_1, \ldots, A_n$. Decomposition of $R$ consists of replacing $R$ by two or more relations such that each new relation scheme contains a subset of the attributes of $R$, and every attribute of $R$ appears as an attribute of at least one of the new relations. May be impossible to reconstruct original relation (lossy), dependency checking may require joins, some queries become more expensive. \\
-\textit{Dependency-preserving decomposition}: there may not be a dependency preserving decomposition into BCNF. Putting a relation in Boyce-Codd Normal Form will not guarantee a dependency preserving decomposition. Putting a relation in Boyce-Codd Normal Form (BCNF) will always guarantee a lossless decomposition.
+\textit{Lossless join}: Decomposition of R into X and Y is lossless-join wrt a set of FDs F if, for every instance $R$ that satisfies F, $\pi X(r) \bowtie \pi Y(r) = R$. It is essential that all decompositions used to deal with redundancy be lossless. \\
+To check if decomposition  is lossless, take union of rel intersection of relations, find closure of intersectioRepresents a decomposition where the following is true: If R is decomposed into X, Y, and Z, and we enforce FDs individually on each of X, Y, and Z, then all FDs on R must also hold on result. All columns each each constraint must be found in one table in the decomposition. \textit{Bias}: Error from erroneous assumptions in learning algorithm. High bias causes algorithm to miss relevant relations between features and target outputs (underfitting). \\
+\textit{Variance}: Error from sensitivity to small fluctuations in training set. High variance causes overfitting, modeling random noise in training data rather than intended outputs.
 
+\textit{OLAP}: Way for users to interact with high-dimensional data. \\
+\textit{Cross-tabulation (pivot tables)}: Aggregates data across pairs of dimensions
+
+\begin{itemize}
+  \item Slicing: selecting a value for a dimension
+  \item Dicing: selecting a range of values for a dimension
+  \item Rollup: aggregating along a dimension
+  \item Drilldown: de-aggregating along a dimension
+\end{itemize}
+
+\textit{Knowledge discovery in databases (KDD)}: Descriptive statistics: describe sample data, can be measured directly from the database. Inferential statistics: estimate population, must be estimated using descriptive statistics. Involves data selection, data cleaning, data mining/ML, evaluation. \\
+\textit{Association rule mining}: Identify predictive rules that relate a subset of items to the (likely) presence of other items in the basket. Does not imply causality! \\
+\textit{Machine learning pattern}: Query and aggregate function. Fits into MapReduce paradigm.
+
+
+textbfrbatim}
+centers <- pick k initial centers
+while (centers changing):
+  // compute assignments
+  asg <- [(x, nearest(centers, x)) for x in data]
+
+  // compute the new centers
+  for i in range(k):
+    centers[i] = mean([x for (x, c) in asg if c == i])
+\end{verbatim}
+
+
+\textbf{K-means++ algorithm}: Instead of picking centers randomly, initializes them to be far away from each other.
+
+\begin{verbatim}
+centers <- set(randomly selecta  single point)
+while len(centers) < k:
+  dSq <- [(x, distToNearest(centers, x)^2) for x in data]
+  c <- sampleOne(data, prob = dSq / sum(dSq))
+  centers.add(c)
+\end{verbatim}
+
+\textit{Res-A}: Sample $k$ records from a stream where we choose record $i$ with probability $w_i$. For each record $i$, we draw a uniform random number $u_i = Unif(0, 1)$. Select the top $k$ records ordered by $u_i^{1 / w_i}$.
+
+\textit{Linear regression}: Model: $f_{\theta}(x) = \theta^T x$, $\theta_{MLE} = (X^T X)^{-1}X^T Y$. Optimal solution can be distributed, calculate $X^T X$ and $X^T$. Loss funtion is mean-squared error: $\frac{1}{n}\sum_{i=1}^n (y_i - f_{\theta}(x_i))^2$ \\
+\textit{Regularization}: Add additional $\lambda R(\theta)$ term. Larger value means lower variance, higher bias, less overfitting.
 % =============================================================================
 
+
+\textit{}Data models: Connects concepts to bits. \\
+
+\textbf{}
+Entity-relationship diagram:
+
+subsectionams
+
+\texti{{Entitlogical schema, not physical schema.y set}: a co
+
+Used to model llection of similar entities. All entities in the set have the same attributes, each entity set has a key (underlined), each attribute has a domain \\
+\textit{Relationship}: association among two or more entities. A relationship can have its own attributes. \\
+\textit{Relationship set}: collection of similar relationships. An n-ary relationship set $R$ relates $n$ entity sets $E_1, \ldots, E_n$ \\
+\textit{Key constraint}: at most one. Arrow pointing from A to B indicates that A has at most one B. \\
+\textit{Participation constraint}: at least one. Indicated by bolded line. \\
+\textit{Weak entity}: identified uniquely only by considering primary key of owner entity. Owner entity set and weak entity set must participate in 1-to-many relationship set (one owner, many weak entities). Weak entity set must have total participation in this identifying relationship set. Have a partial key denoted by a dashed underline. \\
+\textit{Aggregation}: Allows relationships with relationship sets \\
+
+
+If $X \rightarrow Y$, then  indicates that if there are two tuples in $R$ with the same $X$ value, then they must have the same $Y$ value ()but not viecever versa. \\
+
+
+\textit{}Anomalies: Update ayAiescan ocviolate dependencies during updates, insertonions, and deltionetions. Additional work
+
+\textit{}Armstrong'as axiomsbf
+
+\begin{}itemize
+
+\end{}itemize  \item Reflexivity: if x $X \supseteq Y$ then $X \rightarrow Y$
+  \item Augmentation:
+  \item Transitivity: if $X \rightarrow Y$, then $XZ \rightarrow YZ$ for any $Z$If $X \rightarrow Y$ and $Y \rightarrow Z$, then $X \rightarrow Z$
+
+\item\textit{}Union: if $X \rightarrow Y$ and $X \rightarrow Z$, then $X \rightarrow YZ$ \\
+\teixtxit{}tit{}Decomposition: if $X \rightarrow YZ$, then $X \rightarrow Y$ and $X \rightarrow Z$
+
+
+
+\textit{Attribute closures}: Computing closure $F+$ of a set of FDs $F$ is exponential in number of attributes. To check closure of $X$, repeatedly add all attributes $A$ to $X$ such that $X \rightarrow A$ is in $F^+$. If $X^+ = R$, then $X$ is a superkey for $R$. $X$ is a candidate key if it is minimal.
+
+\textit{1st normal form}: all attributes atomic (relational model). Violated by many common data models, relational collection of structured objects. \\
+\textit{Third normal form}: $R$ is in 3NF if, for all $X \rightarrow A$ in $F+$, $A \in X$ (trivial FD), or X is a superkey of R, or A is part of some candidate key (not superkey) for R (A is prime). A lossless-join, dependency-preserving decomposition of R into a collection of 3NF relations always possible. \\
+\textit{Boyce-Codd normal form (BCNF)}: $R$ is in BCNF if for all $X \rightarrow A$ in $F+$, $A \subseteq X$ (trivial FD) or $X is a superkey for R$. R is in BCNF is only non-trivial FDs over R are key constraints. Every field of every tuple records useful information that cannot be inferred via FDs alone. \\
+\textit{Normalization}: decompose into multiple normalized relations. Suppose $R$ contains attributes $A_1, \ldots, A_n$. Decomposition of $R$ consists of replacing $R$ by two or more relations such that each new relation scheme contains a subset of the attributes of $R$, and every attribute of $R$ appears as an attribute of at least one of the new relations. May be impossible to reconstruct original relation (lossy), dependency checking may require joins, some queries become more expensive. \\
+\textit{Lossless join}: Decomposition of R into X and Y is lossless-join wrt a set of FDs F if, for every instance $R$ that satisfies F, $\pi X(r) \bowtie \pi Y(r) = R$. It is essential that all decompositions used to deal with redundancy be lossless. \\
+To check if decomposition  is lossless, take union of rel intersection of relations, find closure of intersectioRepresents a decomposition where the following is true: If R is decomposed into X, Y, and Z, and we enforce FDs individually on each of X, Y, and Z, then all FDs on R must also hold on result. All columns each each constraint must be found in one table in the decomposition.
 \end{multicols}
 \end{document}
